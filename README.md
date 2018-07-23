@@ -17,6 +17,10 @@
 + [Virtualview-iOS](https://github.com/alibaba/VirtualView-iOS)
 + [LazyScrollView](https://github.com/alibaba/lazyscrollview)
 
+### Server
+
++ [TAC](https://github.com/alibaba/tac)
+
 In the system of Android, the structure of a page can be modified by config dynamically while the business components is written in native code which can only be updated with App release. This library, VirtualView, is born to solve this problem. It provides a serial of basic component and layout component like that in Android and builds business component via XML, then compiles the XML file into binary data and deploys it to App with VirutalView sdk to render the view. When the binary data comes from XML deploys dynamically, the business component on released App can be updated dynamically.
 
 The way to write XML template and serialize to binary is borrowed from Android's native development. But in VirtualView it is simplified and enhanced with simple EL expression and logic expression, make it more suitable to Android system.
@@ -38,6 +42,11 @@ For more information, see [this](http://tangram.pingguohe.net/docs/virtualview/a
 + Support simple basic logical expression in XML template.
 + Ship with tools to help developing.
 
+## Real-time compile tools
+[I'm docs](https://github.com/alibaba/virtualview_tools/tree/master/compiler-tools/RealtimePreview)
+
+![](https://raw.githubusercontent.com/alibaba/virtualview_tools/master/compiler-tools/RealtimePreview/screenshot.gif)
+
 ## User Guide
 
 ### Use It Independently
@@ -45,11 +54,11 @@ For more information, see [this](http://tangram.pingguohe.net/docs/virtualview/a
 
 ### Import Library
 
-Please find the latest version(1.0.1 so far) in maven repository. The newest version has been upload to jcenter and MavenCentral, make sure you have added at least one of these repositories.
+Please find the latest version in [release notes](https://github.com/alibaba/Virtualview-Android/releases). The newest version has been upload to jcenter and MavenCentral, make sure you have added at least one of these repositories. As follow:
 
 For gradle:
 ``` gradle
-compile ('com.alibaba.android:virtualview:1.0.1@aar') {
+compile ('com.alibaba.android:virtualview:1.0.5@aar') {
 	transitive = true
 }
 ```
@@ -60,7 +69,7 @@ pom.xml
 <dependency>
   <groupId>com.alibaba.android</groupId>
   <artifactId>virtualview</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.5</version>
   <type>aar</type>
 </dependency>
 ```
@@ -100,14 +109,14 @@ viewManager.loadBinFileSync(TMALLCOMPONENT2_PATH);
 ......
 ```
 
-If you have developed custom basic components, register their builders(Guide to develop custom basic components here TODO):
+If you have developed custom basic components, register their builders(Guide to develop custom basic components [here](http://tangram.pingguohe.net/docs/android/add-a-custom-element)):
 
 ```
 viewManager.getViewFactory().registerBuilder(BizCommon.TM_PRICE_TEXTVIEW, new TMPriceView.Builder());
 viewManager.getViewFactory().registerBuilder(BizCommon.TM_TOTAL_CONTAINER, new TotalContainer.Builder());
 ```
 
-Register event handler for click or exposure: (Information for event handler here TODO)
+Register event handler for click or exposure: (Information for event handler [here](http://tangram.pingguohe.net/docs/android/event-handler))
 
 ```
 vafContext.getEventManager().register(EventManager.TYPE_Click, new IEventProcessor() {
@@ -206,3 +215,9 @@ Before you open an issue or create a pull request, please read [Contributing Gui
 # LICENSE
 
 VirtualView is available under the MIT license.
+
+# WeChatGroup
+
+![](https://img.alicdn.com/tfs/TB11_2_kbSYBuNjSspiXXXNzpXa-167-167.png)
+
+Search `tangram_` or scan the QR code above to be invited in WeChat.

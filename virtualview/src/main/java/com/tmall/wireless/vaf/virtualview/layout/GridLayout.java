@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import android.view.View.MeasureSpec;
 import com.libra.Utils;
 import com.libra.virtualview.common.StringBase;
 import com.tmall.wireless.vaf.framework.VafContext;
+import com.tmall.wireless.vaf.virtualview.Helper.RtlHelper;
 import com.tmall.wireless.vaf.virtualview.core.Layout;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
@@ -85,7 +86,8 @@ public class GridLayout extends Layout {
         int space = mPaddingLeft + mPaddingRight + mItemHorizontalMargin * (mColCount - 1);
         mItemWidth = (width - space) / mColCount;
 
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, size = mSubViews.size(); i < size; i++) {
+            ViewBase child = mSubViews.get(i);
             if (child.isGone()) {
                 continue;
             }
@@ -99,7 +101,6 @@ public class GridLayout extends Layout {
                         mPaddingLeft + mPaddingRight + (mBorderWidth << 1) + childParam.mLayoutMarginLeft
                             + childParam.mLayoutMarginRight, childParam.mLayoutHeight));
             }
-            //measureComChild(child, View.MeasureSpec.makeMeasureSpec(mItemWidth, MeasureSpec.AT_MOST), heightMeasureSpec);
         }
 
         setComMeasuredDimension(getRealWidth(widthMode, width),
@@ -114,7 +115,8 @@ public class GridLayout extends Layout {
 
             childrenWidth = mPaddingLeft + mPaddingRight;
             int count = 0;
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 childrenWidth += child.getComMeasuredWidthWithMargin();
                 if (++count >= mColCount) {
                     break;
@@ -187,7 +189,9 @@ public class GridLayout extends Layout {
                         continue;
                     }
 
-                    child.comLayout(ll, top, ll + itemWidth, top + itemHeight);
+                    int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), ll, itemWidth);
+                    child.comLayout(realLeft, top, realLeft + itemWidth, top + itemHeight);
+
                     ll += itemWidth + mItemHorizontalMargin;
                 }
                 if (mItemHeight > 0) {

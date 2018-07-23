@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import com.libra.virtualview.common.LayoutCommon;
 import com.libra.virtualview.common.StringBase;
 import com.libra.virtualview.common.ViewBaseCommon;
 import com.tmall.wireless.vaf.framework.VafContext;
+import com.tmall.wireless.vaf.virtualview.Helper.RtlHelper;
 import com.tmall.wireless.vaf.virtualview.core.Layout;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
@@ -84,7 +85,8 @@ public class FrameLayout extends Layout {
 
         mMatchParentView.clear();
 
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, size = mSubViews.size(); i < size; i++) {
+            ViewBase child = mSubViews.get(i);
             if (child.isGone()) {
                 continue;
             }
@@ -100,7 +102,8 @@ public class FrameLayout extends Layout {
                 getRealHeight(heightMode, height));
 
         if (mMatchParentView.size() > 0) {
-            for (ViewBase vb : mMatchParentView) {
+            for (int i = 0, length = mMatchParentView.size(); i < length; i++) {
+                ViewBase vb = mMatchParentView.get(i);
                 measureComChild(vb, View.MeasureSpec.makeMeasureSpec(mMeasuredWidth,
                         View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(mMeasuredHeight,
                         View.MeasureSpec.EXACTLY));
@@ -112,7 +115,8 @@ public class FrameLayout extends Layout {
         int ret = size;
         if (View.MeasureSpec.AT_MOST == mode) {
             int childrenWidth = 0;
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (child.isGone()) {
                     continue;
                 }
@@ -139,7 +143,8 @@ public class FrameLayout extends Layout {
         int ret = size;
         if (View.MeasureSpec.AT_MOST == mode) {
             int childrenHeight = 0;
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (child.isGone()) {
                     continue;
                 }
@@ -157,7 +162,8 @@ public class FrameLayout extends Layout {
             ret = size;
         } else {
             int childrenHeight = 0;
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (child.isGone()) {
                     continue;
                 }
@@ -178,7 +184,8 @@ public class FrameLayout extends Layout {
 
     @Override
     public void onComLayout(boolean changed, int l, int t, int r, int b) {
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, length = mSubViews.size(); i < length; i++) {
+            ViewBase child = mSubViews.get(i);
             if (child.isGone()) {
                 continue;
             }
@@ -206,7 +213,8 @@ public class FrameLayout extends Layout {
                 tt = t + mPaddingTop + childP.mLayoutMarginTop + mBorderWidth;
             }
 
-            child.comLayout(ll, tt, ll + w, tt + h);
+            int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), ll, w);
+            child.comLayout(realLeft, tt, realLeft + w, tt + h);
         }
     }
 

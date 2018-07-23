@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,10 @@
 
 package com.tmall.wireless.vaf.virtualview.view.line;
 
-import android.graphics.Canvas;
 import android.view.View;
-
 import com.tmall.wireless.vaf.framework.VafContext;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
-import com.tmall.wireless.vaf.virtualview.loader.StringLoader;
 
 /**
  * Created by gujicheng on 16/11/2.
@@ -44,7 +41,7 @@ public class NativeLine extends LineBase {
     public NativeLine(VafContext context, ViewCache viewCache) {
         super(context, viewCache);
 
-        mNative = new NativeLineImp(context.getContext(), this);
+        mNative = new NativeLineImp(context.forViewConstruction(), this);
     }
 
     @Override
@@ -63,7 +60,6 @@ public class NativeLine extends LineBase {
     @Override
     public void onParseValueFinished() {
         super.onParseValueFinished();
-
         mNative.setPaintParam(mLineColor, mLineWidth, mStyle);
     }
 
@@ -94,25 +90,9 @@ public class NativeLine extends LineBase {
 
     @Override
     public void comLayout(int l, int t, int r, int b) {
+        super.comLayout(l, t, r, b);
         mNative.comLayout(l, t, r, b);
     }
-
-//    @Override
-//    protected void changeVisibility() {
-//        switch (mVisibility) {
-//            case INVISIBLE:
-//                mNative.setVisibility(View.INVISIBLE);
-//                break;
-//
-//            case VISIBLE:
-//                mNative.setVisibility(View.VISIBLE);
-//                break;
-//
-//            case GONE:
-//                mNative.setVisibility(View.GONE);
-//                break;
-//        }
-//    }
 
     public static class Builder implements ViewBase.IBuilder {
         @Override

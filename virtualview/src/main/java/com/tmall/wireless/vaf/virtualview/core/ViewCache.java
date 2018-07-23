@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,13 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
 import com.libra.TextUtils;
 import com.libra.Utils;
+import com.libra.virtualview.common.TextBaseCommon;
 import com.libra.virtualview.common.ViewBaseCommon;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -89,6 +91,8 @@ public class ViewCache {
 
         public static final int TYPE_OBJECT = 7;
 
+        public static final int TYPE_TEXT_STYLE = 8;
+
         public Item(ViewBase v) {
             this(v, 0);
         }
@@ -138,21 +142,22 @@ public class ViewCache {
                         case TYPE_GRAVITY:
                             int tempValue = 0;
                             String[] strArr = string.split("\\|");
-                            for (String str : strArr) {
-                                str = str.trim();
-                                if (TextUtils.equals("left", str)) {
+                            String gravityStr = "";
+                            for (int i = 0; i < strArr.length; i++) {
+                                gravityStr = strArr[i].trim();
+                                if (TextUtils.equals("left", gravityStr)) {
                                     tempValue |= ViewBaseCommon.LEFT;
-                                } else if (TextUtils.equals("right", str)) {
+                                } else if (TextUtils.equals("right", gravityStr)) {
                                     tempValue |= ViewBaseCommon.RIGHT;
-                                } else if (TextUtils.equals("h_center", str)) {
+                                } else if (TextUtils.equals("h_center", gravityStr)) {
                                     tempValue |= ViewBaseCommon.H_CENTER;
-                                } else if (TextUtils.equals("top", str)) {
+                                } else if (TextUtils.equals("top", gravityStr)) {
                                     tempValue |= ViewBaseCommon.TOP;
-                                } else if (TextUtils.equals("bottom", str)) {
+                                } else if (TextUtils.equals("bottom", gravityStr)) {
                                     tempValue |= ViewBaseCommon.BOTTOM;
-                                } else if (TextUtils.equals("v_center", str)) {
+                                } else if (TextUtils.equals("v_center", gravityStr)) {
                                     tempValue |= ViewBaseCommon.V_CENTER;
-                                } else if (TextUtils.equals("center", str)) {
+                                } else if (TextUtils.equals("center", gravityStr)) {
                                     tempValue |= ViewBaseCommon.H_CENTER;
                                     tempValue |= ViewBaseCommon.V_CENTER;
                                 } else {
@@ -160,6 +165,24 @@ public class ViewCache {
                                 }
                             }
                             value = Integer.valueOf(tempValue);
+                            break;
+                        case TYPE_TEXT_STYLE:
+                            int styleValue = 0;
+                            String[] strs = string.split("\\|");
+                            String styleStr = "";
+                            for (int i = 0; i < strs.length; i++) {
+                                styleStr = strs[i].trim();
+                                if (TextUtils.equals("bold", styleStr)) {
+                                    styleValue |= TextBaseCommon.BOLD;
+                                } else if (TextUtils.equals("italic", styleStr)) {
+                                    styleValue |= TextBaseCommon.ITALIC;
+                                } else if (TextUtils.equals("styleStrike", styleStr)) {
+                                    styleValue |= TextBaseCommon.STRIKE;
+                                }
+                            }
+                            value = Integer.valueOf(styleValue);
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -192,6 +215,7 @@ public class ViewCache {
                     case TYPE_COLOR:
                     case TYPE_GRAVITY:
                     case TYPE_VISIBILITY:
+                    case TYPE_TEXT_STYLE:
                         Integer enumValue = Utils.toInteger(value);
                         if (enumValue != null) {
                             mView.setAttribute(mKey, enumValue.intValue());
@@ -358,6 +382,7 @@ public class ViewCache {
             return value;
         }
 
+        @Override
         public boolean compile(String path) {
             if (path == null || path.length() == 0) {
                 return false;
@@ -502,6 +527,7 @@ public class ViewCache {
 
         private String value;
 
+        @Override
         public boolean compile(String el) {
             if (el == null || el.length() == 0) {
                 return false;

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,13 +28,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.text.TextUtils;
 import com.libra.virtualview.common.ImageCommon;
 import com.tmall.wireless.vaf.framework.VafContext;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
-import org.json.JSONObject;
 
 /**
  * Created by gujicheng on 16/8/19.
@@ -50,6 +48,7 @@ public class VirtualImage extends ImageBase {
     public VirtualImage(VafContext context, ViewCache viewCache) {
         super(context, viewCache);
         mMatrix = new Matrix();
+        mImp.setViewBase(this);
     }
 
     @Override

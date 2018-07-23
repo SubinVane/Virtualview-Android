@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,7 @@ public class VirtualLine extends LineBase {
         super(context, viewCache);
 
         mImp.setAntiAlias(true);
+        mImp.setViewBase(this);
         mPaint.setColor(Color.BLACK);
     }
 
@@ -76,6 +77,8 @@ public class VirtualLine extends LineBase {
 
             case LineBaseCommon.STYLE_SOLID:
                 mPaint.setStyle(Paint.Style.FILL);
+                break;
+            default:
                 break;
         }
     }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,10 @@
 
 package com.tmall.wireless.vaf.virtualview.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 
@@ -33,14 +35,7 @@ import com.libra.Utils;
 import com.libra.expr.common.ExprCode;
 import com.libra.virtualview.common.LayoutCommon;
 import com.libra.virtualview.common.StringBase;
-import com.libra.virtualview.common.ViewBaseCommon;
 import com.tmall.wireless.vaf.framework.VafContext;
-import com.tmall.wireless.vaf.virtualview.Helper.VirtualViewUtils;
-import com.tmall.wireless.vaf.virtualview.core.ViewCache.Item;
-import com.tmall.wireless.vaf.virtualview.loader.StringLoader;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by gujicheng on 16/8/15.
@@ -66,7 +61,8 @@ public abstract class Layout extends ViewBase {
     public void ready() {
         super.ready();
 
-        for (ViewBase vb : mSubViews) {
+        for (int i = 0, size = mSubViews.size(); i < size; i++) {
+            ViewBase vb = mSubViews.get(i);
             vb.ready();
         }
     }
@@ -75,7 +71,8 @@ public abstract class Layout extends ViewBase {
     public void destroy() {
         super.destroy();
 
-        for (ViewBase vb : mSubViews) {
+        for (int i = 0, size = mSubViews.size(); i < size; i++) {
+            ViewBase vb = mSubViews.get(i);
             vb.destroy();
         }
 
@@ -87,7 +84,8 @@ public abstract class Layout extends ViewBase {
         ViewBase ret = super.findViewBaseById(id);
 
         if (null == ret) {
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, size = mSubViews.size(); i < size; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (null != (ret = child.findViewBaseById(id))) {
                     break;
                 }
@@ -102,7 +100,8 @@ public abstract class Layout extends ViewBase {
         ViewBase ret = super.findViewBaseByName(name);
 
         if (null == ret) {
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, size = mSubViews.size(); i < size; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (null != (ret = child.findViewBaseByName(name))) {
                     break;
                 }
@@ -117,13 +116,15 @@ public abstract class Layout extends ViewBase {
         boolean shouldHandle = false;
         for (int i = mSubViews.size() - 1; i >= 0; i--) {
             ViewBase v = mSubViews.get(i);
-            int l = v.getDrawLeft();
-            int t = v.getDrawTop();
+            int l = v.getAbsoluteDrawLeft();
+            int t = v.getAbsoluteDrawTop();
             int w = v.getComMeasuredWidth();
             int h = v.getComMeasuredHeight();
             if (x >= l && x < (l + w) && y >= t && y <= t + h) {
                 shouldHandle = v.handleEvent(x, y);
-                break;
+                if (shouldHandle) {
+                    break;
+                }
             }
         }
         if (!shouldHandle) {
@@ -138,13 +139,15 @@ public abstract class Layout extends ViewBase {
 
         for (int i = mSubViews.size() - 1; i >= 0; i--) {
             ViewBase v = mSubViews.get(i);
-            int l = v.getDrawLeft();
-            int t = v.getDrawTop();
+            int l = v.getAbsoluteDrawLeft();
+            int t = v.getAbsoluteDrawTop();
             int w = v.getComMeasuredWidth();
             int h = v.getComMeasuredHeight();
             if (x >= l && x < (l + w) && y >= t && y <= t + h) {
                 deal = v.click(x, y, isLong);
-                break;
+                if (deal) {
+                    break;
+                }
             }
         }
 
@@ -157,7 +160,7 @@ public abstract class Layout extends ViewBase {
 
     @Override
     public ViewBase getChild(int index) {
-        if (index > 0 && index < mSubViews.size()) {
+        if (index >= 0 && index < mSubViews.size()) {
             return mSubViews.get(index);
         }
 
@@ -168,7 +171,8 @@ public abstract class Layout extends ViewBase {
     public void reset() {
         super.reset();
 
-        for (ViewBase v : mSubViews) {
+        for (int i = 0, size = mSubViews.size(); i < size; i++) {
+            ViewBase v = mSubViews.get(i);
             v.reset();
         }
     }
@@ -177,36 +181,24 @@ public abstract class Layout extends ViewBase {
     public void comDraw(Canvas canvas) {
         super.comDraw(canvas);
 
+        //FIXME let layout clip virtual children
+        //canvas.save();
+        //VirtualViewUtils.clipCanvas(canvas, mMeasuredWidth, mMeasuredHeight, mBorderWidth,
+        //    mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
         // draw children
-        for (ViewBase v : mSubViews) {
+        for (int i = 0, size = mSubViews.size(); i < size; i++) {
+            ViewBase v = mSubViews.get(i);
             if (v.shouldDraw()) {
                 v.comDraw(canvas);
             }
         }
+        //canvas.restore();
     }
 
     @Override
     protected void onComDraw(Canvas canvas) {
         super.onComDraw(canvas);
-        if (mBorderWidth > 0) {
-            //if (!Float.isNaN(mAlpha)) {
-            //    if (mAlpha > 1.0f) {
-            //        mAlpha = 1.0f;
-            //    } else if (mAlpha < 0.0f) {
-            //        mAlpha = 0.0f;
-            //    }
-            //    mBorderPaint.setAlpha((int)(mAlpha * 255));
-            //}
-            if (mBorderPaint == null) {
-                mBorderPaint = new Paint();
-                mBorderPaint.setAntiAlias(true);
-                mBorderPaint.setStyle(Paint.Style.STROKE);
-            }
-            mBorderPaint.setColor(mBorderColor);
-            mBorderPaint.setStrokeWidth(mBorderWidth);
-            VirtualViewUtils.drawBorder(canvas, mBorderPaint, mMeasuredWidth, mMeasuredHeight, mBorderWidth,
-                mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
-        }
+        drawBorder(canvas);
     }
 
     @Override
@@ -216,22 +208,36 @@ public abstract class Layout extends ViewBase {
         if (mPaint == null) {
             mPaint = new Paint();
             mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setAntiAlias(true);
         }
 
-        if (mBorderWidth > 0) {
-            if (mBorderPaint == null) {
-                mBorderPaint = new Paint();
-                mBorderPaint.setAntiAlias(true);
-                mBorderPaint.setStyle(Paint.Style.STROKE);
-            }
-            mBorderPaint.setColor(mBorderColor);
-            mBorderPaint.setStrokeWidth(mBorderWidth);
-        }
     }
+
+    @Override
+    protected boolean changeVisibility() {
+        boolean ret = super.changeVisibility();
+        for (int i = 0, size = mSubViews.size(); i < size; i++) {
+            ViewBase v = mSubViews.get(i);
+            v.changeVisibility();
+        }
+        return ret;
+    }
+
 
     public void addView(ViewBase view) {
         mSubViews.add(view);
         view.mParent = this;
+        view.changeVisibility();
+    }
+
+    public boolean removeView(ViewBase view) {
+        if (mSubViews.contains(view)) {
+            mSubViews.remove(view);
+            view.mParent = null;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     protected void measureComChild(ViewBase child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
@@ -396,10 +402,15 @@ public abstract class Layout extends ViewBase {
         public int mLayoutWidth;
         public int mLayoutHeight;
 
+        public int mLayoutMargin;
         public int mLayoutMarginLeft;
+        protected boolean isLayoutMarginLeftSet;
         public int mLayoutMarginRight;
+        protected boolean isLayoutMarginRightSet;
         public int mLayoutMarginTop;
+        protected boolean isLayoutMarginTopSet;
         public int mLayoutMarginBottom;
+        protected boolean isLayoutMarginBottomSet;
 
         public Params() {
             mLayoutWidth = 0;
@@ -425,18 +436,36 @@ public abstract class Layout extends ViewBase {
                 case StringBase.STR_ID_layoutHeight:
                     mLayoutHeight = Utils.rp2px(value);
                     break;
-
+                case StringBase.STR_ID_layoutMargin:
+                    mLayoutMargin = Utils.rp2px(value);
+                    if (!isLayoutMarginLeftSet) {
+                        mLayoutMarginLeft = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginRightSet) {
+                        mLayoutMarginRight = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginTopSet) {
+                        mLayoutMarginTop = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginBottomSet) {
+                        mLayoutMarginBottom = mLayoutMargin;
+                    }
+                    break;
                 case StringBase.STR_ID_layoutMarginLeft:
                     mLayoutMarginLeft = Utils.rp2px(value);
+                    isLayoutMarginLeftSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginRight:
                     mLayoutMarginRight = Utils.rp2px(value);
+                    isLayoutMarginRightSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginTop:
                     mLayoutMarginTop = Utils.rp2px(value);
+                    isLayoutMarginTopSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginBottom:
                     mLayoutMarginBottom = Utils.rp2px(value);
+                    isLayoutMarginBottomSet = true;
                     break;
 
                 default:
@@ -464,18 +493,36 @@ public abstract class Layout extends ViewBase {
                         mLayoutHeight = (int) value;
                     }
                     break;
-
+                case StringBase.STR_ID_layoutMargin:
+                    mLayoutMargin = Utils.dp2px(value);
+                    if (!isLayoutMarginLeftSet) {
+                        mLayoutMarginLeft = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginRightSet) {
+                        mLayoutMarginRight = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginTopSet) {
+                        mLayoutMarginTop = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginBottomSet) {
+                        mLayoutMarginBottom = mLayoutMargin;
+                    }
+                    break;
                 case StringBase.STR_ID_layoutMarginLeft:
                     mLayoutMarginLeft = Utils.dp2px(value);
+                    isLayoutMarginLeftSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginRight:
                     mLayoutMarginRight = Utils.dp2px(value);
+                    isLayoutMarginRightSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginTop:
                     mLayoutMarginTop = Utils.dp2px(value);
+                    isLayoutMarginTopSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginBottom:
                     mLayoutMarginBottom = Utils.dp2px(value);
+                    isLayoutMarginBottomSet = true;
                     break;
 
                 default:
@@ -500,18 +547,36 @@ public abstract class Layout extends ViewBase {
                 case StringBase.STR_ID_layoutHeight:
                     mLayoutHeight = Utils.rp2px(value);
                     break;
-
+                case StringBase.STR_ID_layoutMargin:
+                    mLayoutMargin = Utils.rp2px(value);
+                    if (!isLayoutMarginLeftSet) {
+                        mLayoutMarginLeft = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginRightSet) {
+                        mLayoutMarginRight = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginTopSet) {
+                        mLayoutMarginTop = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginBottomSet) {
+                        mLayoutMarginBottom = mLayoutMargin;
+                    }
+                    break;
                 case StringBase.STR_ID_layoutMarginLeft:
                     mLayoutMarginLeft = Utils.rp2px(value);
+                    isLayoutMarginLeftSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginRight:
                     mLayoutMarginRight = Utils.rp2px(value);
+                    isLayoutMarginRightSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginTop:
                     mLayoutMarginTop = Utils.rp2px(value);
+                    isLayoutMarginTopSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginBottom:
                     mLayoutMarginBottom = Utils.rp2px(value);
+                    isLayoutMarginBottomSet = true;
                     break;
 
                 default:
@@ -539,18 +604,36 @@ public abstract class Layout extends ViewBase {
                         mLayoutHeight = value;
                     }
                     break;
-
+                case StringBase.STR_ID_layoutMargin:
+                    mLayoutMargin = Utils.dp2px(value);
+                    if (!isLayoutMarginLeftSet) {
+                        mLayoutMarginLeft = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginRightSet) {
+                        mLayoutMarginRight = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginTopSet) {
+                        mLayoutMarginTop = mLayoutMargin;
+                    }
+                    if (!isLayoutMarginBottomSet) {
+                        mLayoutMarginBottom = mLayoutMargin;
+                    }
+                    break;
                 case StringBase.STR_ID_layoutMarginLeft:
                     mLayoutMarginLeft = Utils.dp2px(value);
+                    isLayoutMarginLeftSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginRight:
                     mLayoutMarginRight = Utils.dp2px(value);
+                    isLayoutMarginRightSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginTop:
                     mLayoutMarginTop = Utils.dp2px(value);
+                    isLayoutMarginTopSet = true;
                     break;
                 case StringBase.STR_ID_layoutMarginBottom:
                     mLayoutMarginBottom = Utils.dp2px(value);
+                    isLayoutMarginBottomSet = true;
                     break;
 
                 default:

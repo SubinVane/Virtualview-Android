@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -113,7 +113,7 @@ public class TotalContainer extends NativeViewBase {
                 sConstructorMap.put(mNativeViewName, constructor);
             }
             if (constructor != null) {
-                mConstructorArgs[0] = mContext.getContext();
+                mConstructorArgs[0] = mContext.forViewConstruction();
                 mConstructorArgs[1] = null;
                 final Object obj = constructor.newInstance(mConstructorArgs);
                 if (obj instanceof IViewInterface) {

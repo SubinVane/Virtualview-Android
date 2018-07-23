@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,19 +24,19 @@
 
 package com.tmall.wireless.vaf.virtualview.container;
 
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.libra.virtualview.common.LayoutCommon;
 import com.tmall.wireless.vaf.framework.cm.ContainerService;
 import com.tmall.wireless.vaf.virtualview.core.IContainer;
 import com.tmall.wireless.vaf.virtualview.core.IView;
 import com.tmall.wireless.vaf.virtualview.core.Layout;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
-
-import java.util.List;
+import com.tmall.wireless.vaf.virtualview.view.nlayout.INativeLayoutImpl;
+import com.tmall.wireless.vaf.virtualview.view.nlayout.NativeLayoutImpl;
 
 /**
  * Created by gujicheng on 16/8/16.
@@ -63,16 +63,34 @@ public class Container extends ViewGroup implements IContainer, IView {
 
     @Override
     public void attachViews() {
-        attachViews(mView);
+        attachViews(mView, this);
     }
 
-    protected void attachViews(ViewBase view) {
+    protected void attachViews(ViewBase view, View displayViewHolder) {
+        view.setDisplayViewContainer(displayViewHolder);
         if (view instanceof Layout) {
-            Layout layout = (Layout) view;
-            List<ViewBase> subViews = layout.getSubViews();
-            if (null != subViews) {
-                for (ViewBase com : subViews) {
-                    attachViews(com);
+            View v = view.getNativeView();
+            if (null != v) {
+                LayoutParams layoutParams = new LayoutParams(view.getComLayoutParams().mLayoutWidth, view.getComLayoutParams().mLayoutHeight);
+                addView(v, layoutParams);
+                if (v instanceof INativeLayoutImpl) {
+                    Layout layout = (Layout) view;
+                    List<ViewBase> subViews = layout.getSubViews();
+                    if (null != subViews) {
+                        for (int i = 0, size = subViews.size(); i < size; i++) {
+                            ViewBase com = subViews.get(i);
+                            ((INativeLayoutImpl) v).attachViews(com, v);
+                        }
+                    }
+                }
+            } else {
+                Layout layout = (Layout) view;
+                List<ViewBase> subViews = layout.getSubViews();
+                if (null != subViews) {
+                    for (int i = 0, size = subViews.size(); i < size; i++) {
+                        ViewBase com = subViews.get(i);
+                        attachViews(com, displayViewHolder);
+                    }
                 }
             }
         } else {
@@ -122,14 +140,16 @@ public class Container extends ViewGroup implements IContainer, IView {
     @Override
     public void measureComponent(int widthMeasureSpec, int heightMeasureSpec) {
         if (null != mView) {
-            mView.measureComponent(widthMeasureSpec, heightMeasureSpec);
+            if (!mView.isGone()) {
+                mView.measureComponent(widthMeasureSpec, heightMeasureSpec);
+            }
             this.setMeasuredDimension(mView.getComMeasuredWidth(), mView.getComMeasuredHeight());
         }
     }
 
     @Override
     public void comLayout(int l, int t, int r, int b) {
-        if (null != mView) {
+        if (null != mView && !mView.isGone()) {
             mView.comLayout(0, 0, r - l, b - t);
             this.layout(l, t, r, b);
         }
@@ -138,14 +158,16 @@ public class Container extends ViewGroup implements IContainer, IView {
     @Override
     public void onComMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (null != mView) {
-            mView.onComMeasure(widthMeasureSpec, heightMeasureSpec);
+            if (!mView.isGone()) {
+                mView.onComMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
             setMeasuredDimension(mView.getComMeasuredWidth(), mView.getComMeasuredHeight());
         }
     }
 
     @Override
     public void onComLayout(boolean changed, int l, int t, int r, int b) {
-        if (null != mView) {
+        if (null != mView && !mView.isGone()) {
             mView.onComLayout(changed, l, t, r, b);
         }
     }

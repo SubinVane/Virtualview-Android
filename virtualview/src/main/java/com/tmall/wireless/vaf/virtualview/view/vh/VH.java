@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ public class VH extends NativeViewBase {
 
     public VH(VafContext context, ViewCache viewCache) {
         super(context, viewCache);
-        mNative = new VHImp(context.getContext());
+        mNative = new VHImp(context.forViewConstruction());
         __mNative = mNative;
     }
 
@@ -137,13 +137,6 @@ public class VH extends NativeViewBase {
     @Override
     public boolean isContainer() {
         return true;
-    }
-
-    @Override
-    public void onParseValueFinished() {
-        super.onParseValueFinished();
-
-        mNative.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
     }
 
     @Override

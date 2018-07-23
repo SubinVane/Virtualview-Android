@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 package com.tmall.wireless.vaf.virtualview.core;
 
+import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Bitmap;
@@ -32,16 +33,15 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
 import android.os.Trace;
+import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
-
 import com.libra.Utils;
 import com.libra.expr.common.ExprCode;
 import com.libra.virtualview.common.Common;
@@ -52,12 +52,15 @@ import com.libra.virtualview.common.ViewBaseCommon;
 import com.tmall.wireless.vaf.expr.engine.ExprEngine;
 import com.tmall.wireless.vaf.framework.VafContext;
 import com.tmall.wireless.vaf.virtualview.Helper.ImageLoader;
+import com.tmall.wireless.vaf.virtualview.Helper.RtlHelper;
 import com.tmall.wireless.vaf.virtualview.Helper.VirtualViewUtils;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache.Item;
 import com.tmall.wireless.vaf.virtualview.event.EventData;
 import com.tmall.wireless.vaf.virtualview.event.EventManager;
 import com.tmall.wireless.vaf.virtualview.loader.StringLoader;
-
+import com.tmall.wireless.vaf.virtualview.view.nlayout.INativeLayout;
+import com.tmall.wireless.vaf.virtualview.view.nlayout.INativeLayoutImpl;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import static com.libra.virtualview.common.ViewBaseCommon.AUTO_DIM_DIR_NONE;
@@ -84,17 +87,19 @@ public abstract class ViewBase implements IView {
     protected int mVersion;
     protected boolean mIsDrawed;
 
+    protected View mDisplayViewContainer;
+
+    /** absolute value in virtual container, relative value in native container **/
     protected int mDrawLeft;
+    /** absolute value in virtual container, relative value in native container **/
     protected int mDrawTop;
     protected Paint mPaint;
-    protected Paint mBackgroundPaint;
 
     protected int mBackground;
     protected String mBackgroundImagePath;
     protected Bitmap mBackgroundImage = null;
     protected Matrix mMatrixBG = null;
 
-    protected Paint mBorderPaint;
     protected int mBorderWidth = 0;
     protected int mBorderColor = Color.BLACK;
     protected int mBorderRadius = 0;
@@ -121,9 +126,14 @@ public abstract class ViewBase implements IView {
     protected float mAutoDimX = 1;
     protected float mAutoDimY = 1;
 
+    private int mPadding;
+    private boolean isPaddingLeftSet;
     protected int mPaddingLeft;
+    private boolean isPaddingRightSet;
     protected int mPaddingRight;
+    private boolean isPaddingTopSet;
     protected int mPaddingTop;
+    private boolean isPaddingBottomSet;
     protected int mPaddingBottom;
 
     protected int mGravity;
@@ -152,6 +162,11 @@ public abstract class ViewBase implements IView {
     protected String mName;
 
     protected Object mTag;
+
+    /**
+     * Map used to store views' tags.
+     */
+    private SimpleArrayMap<String, Object> mKeyedTags;
 
     protected ExprCode mClickCode;
     protected ExprCode mBeforeLoadDataCode;
@@ -197,8 +212,20 @@ public abstract class ViewBase implements IView {
         mUuid = 0;
     }
 
+    public void setDisplayViewContainer(View displayViewContainer) {
+        mDisplayViewContainer = displayViewContainer;
+    }
+
+    public View getDisplayViewContainer() {
+        return mDisplayViewContainer;
+    }
+
     public String getAction() {
         return mAction;
+    }
+
+    public String getActionParam() {
+        return mActionParam;
     }
 
     public Object getJSONData() {
@@ -207,25 +234,11 @@ public abstract class ViewBase implements IView {
 
     public void setBorderWidth(int width) {
         mBorderWidth = width;
-
-        if (null == mBorderPaint) {
-            mBorderPaint = new Paint();
-            mBorderPaint.setStyle(Paint.Style.STROKE);
-            mBorderPaint.setAntiAlias(true);
-        }
-        mBorderPaint.setStrokeWidth(mBorderWidth);
         this.refresh();
     }
 
     public void setBorderColor(int color) {
         mBorderColor = color;
-
-        if (null == mBorderPaint) {
-            mBorderPaint = new Paint();
-            mBorderPaint.setStyle(Paint.Style.STROKE);
-            mBorderPaint.setAntiAlias(true);
-        }
-        mBorderPaint.setColor(mBorderColor);
         this.refresh();
     }
 
@@ -241,13 +254,8 @@ public abstract class ViewBase implements IView {
     protected void setBackgroundColor(int color) {
         mBackground = color;
         View view = getNativeView();
-        if (null != view) {
+        if (null != view && !(view instanceof INativeLayoutImpl)) {
             view.setBackgroundColor(color);
-        } else {
-            if (null == mBackgroundPaint) {
-                mBackgroundPaint = new Paint();
-            }
-            mBackgroundPaint.setColor(mBackground);
         }
     }
 
@@ -335,10 +343,6 @@ public abstract class ViewBase implements IView {
         return ret;
     }
 
-    public Paint getBackgroundPaint() {
-        return mBackgroundPaint;
-    }
-
     public int getBackground() {
         return mBackground;
     }
@@ -349,6 +353,22 @@ public abstract class ViewBase implements IView {
 
     public int getBorderRadius() {
         return mBorderRadius;
+    }
+
+    public int getBorderTopLeftRadius() {
+        return mBorderTopLeftRadius;
+    }
+
+    public int getBorderTopRightRadius() {
+        return mBorderTopRightRadius;
+    }
+
+    public int getBorderBottomLeftRadius() {
+        return mBorderBottomLeftRadius;
+    }
+
+    public int getBorderBottomRightRadius() {
+        return mBorderBottomRightRadius;
     }
 
     public int getAlign() {
@@ -369,6 +389,21 @@ public abstract class ViewBase implements IView {
 
     public boolean isRoot() {
         return mParent == null;
+    }
+
+    public int decideFinalVisibility() {
+        if (mParent == null) {
+            return mVisibility;
+        } else {
+            int parentVisibility = mParent.decideFinalVisibility();
+            if (parentVisibility == ViewBaseCommon.VISIBLE) {
+                return mVisibility;
+            } else if (parentVisibility == ViewBaseCommon.INVISIBLE) {
+                return ViewBaseCommon.INVISIBLE;
+            } else {
+                return ViewBaseCommon.GONE;
+            }
+        }
     }
 
     public String getViewType() {
@@ -395,6 +430,29 @@ public abstract class ViewBase implements IView {
         return mTag;
     }
 
+    public Object getTag(String key) {
+        if (mKeyedTags != null) {
+            return mKeyedTags.get(key);
+        }
+        return null;
+    }
+
+    public void setTag(String key, Object tag) {
+        if (mKeyedTags == null) {
+            mKeyedTags = new SimpleArrayMap<>();
+        }
+
+        mKeyedTags.put(key, tag);
+    }
+
+    public void setFlag(int flag, int flagMask) {
+        mFlag = (mFlag & ~flagMask) | (flag & flagMask);
+    }
+
+    public void clear(int flagMask) {
+        mFlag = mFlag & ~flagMask;
+    }
+
     public IBean getBean() {
         return mBean;
     }
@@ -410,7 +468,7 @@ public abstract class ViewBase implements IView {
     }
 
     final public boolean supportExposure() {
-        return (0 != (mFlag & FLAG_EXPOSURE));
+        return (0 != (mFlag & FLAG_EXPOSURE)) && isVisible();
     }
 
     final public boolean isClickable() {
@@ -434,11 +492,12 @@ public abstract class ViewBase implements IView {
         }
     }
 
-    private boolean changeVisibility() {
+    protected boolean changeVisibility() {
+        int finalVisibility = decideFinalVisibility();
         boolean ret = false;
         View nativeView = this.getNativeView();
         if (null != nativeView) {
-            switch (mVisibility) {
+            switch (finalVisibility) {
                 case ViewBaseCommon.INVISIBLE:
                     nativeView.setVisibility(View.INVISIBLE);
                     break;
@@ -455,7 +514,7 @@ public abstract class ViewBase implements IView {
             }
             ret = true;
         } else if (isContainer()) {
-            switch(mVisibility) {
+            switch(finalVisibility) {
                 case ViewBaseCommon.INVISIBLE:
                     mViewCache.getHolderView().setVisibility(View.INVISIBLE);
                     break;
@@ -479,6 +538,7 @@ public abstract class ViewBase implements IView {
     public boolean isGone() {
         return (mVisibility == ViewBaseCommon.GONE);
     }
+
     public int getVisibility() {
         return mVisibility;
     }
@@ -530,9 +590,9 @@ public abstract class ViewBase implements IView {
 
     protected boolean handleRoute(int id) {
         boolean ret = onCheckHandle(id);
-        if (!ret && null != mParent) {
-            ret = mParent.handleRoute(id);
-        }
+        //if (!ret && null != mParent) {
+        //    ret = mParent.handleRoute(id);
+        //}
         return ret;
     }
 
@@ -547,9 +607,9 @@ public abstract class ViewBase implements IView {
         } else {
             ret = onClick(id);
         }
-        if (!ret && null != mParent) {
-            ret = mParent.clickRoute(id, isLong);
-        }
+        //if (!ret && null != mParent) {
+        //    ret = mParent.clickRoute(mParent.mId, isLong);
+        //}
         return ret;
     }
 
@@ -588,7 +648,7 @@ public abstract class ViewBase implements IView {
             }
         }
 
-        if (isClickable()) {
+        if (isClickable() && isVisible()) {
            ret = mContext.getEventManager().emitEvent(EventManager.TYPE_Click, EventData.obtainData(mContext, this));
         }
 
@@ -603,13 +663,54 @@ public abstract class ViewBase implements IView {
         return false;
     }
 
+    /**
+     *
+     * @return left value relative to its nearest native parent container
+     */
     final public int getDrawLeft() {
         return mDrawLeft;
     }
 
+    /**
+     *
+     * @return top value relative to is nearest native parent container
+     */
     final public int getDrawTop() {
         return mDrawTop;
     }
+
+    /**
+     *
+     * @return absolute left value in its root container
+     */
+    final public int getAbsoluteDrawLeft() {
+        int result = mDrawLeft;
+        ViewBase parent = this.mParent;
+        while (parent != null) {
+            if (parent instanceof INativeLayout) {
+                result += parent.getDrawLeft();
+            }
+            parent = parent.mParent;
+        }
+        return result;
+    }
+
+    /**
+     *
+     * @return absolute top value in its root container
+     */
+    final public int getAbsoluteDrawTop() {
+        int result = mDrawTop;
+        ViewBase parent = this.mParent;
+        while (parent != null) {
+            if (parent instanceof INativeLayout) {
+                result += parent.getDrawTop();
+            }
+            parent = parent.mParent;
+        }
+        return result;
+    }
+
 
     final public void setHoldView(View v) {
         mViewCache.setHoldView(v);
@@ -640,15 +741,9 @@ public abstract class ViewBase implements IView {
     }
 
     public void refresh(int l, int t, int r, int b) {
-//        Log.d(TAG, "refresh:" + mIsDrawed);
-//        if (mIsDrawed) {
-        View holderView = mViewCache.getHolderView();
-        if (null != mViewCache && null != holderView) {
-            holderView.invalidate(l, t, r, b);
-        } else {
-//            Log.d(TAG, "refresh holdView is null" + this + mData);
+        if (mDisplayViewContainer != null) {
+            mDisplayViewContainer.invalidate(l, t, r, b);
         }
-//        }
     }
 
     public ViewBase findViewBaseById(int id) {
@@ -822,14 +917,9 @@ public abstract class ViewBase implements IView {
     public void setBackgroundImage(String path) {
         mBackgroundImagePath = path;
         mBackgroundImage = null;
-        if (null == mBackgroundPaint) {
-            mBackgroundPaint = new Paint();
-        }
-
         if (null == mMatrixBG) {
             mMatrixBG = new Matrix();
         }
-
         mContext.getImageLoader().getBitmap(path, mMeasuredWidth, mMeasuredHeight, new ImageLoader.Listener() {
             @Override
             public void onImageLoadSuccess(Bitmap bmp) {
@@ -884,27 +974,28 @@ public abstract class ViewBase implements IView {
 
     protected void onComDraw(Canvas canvas) {
         if (getNativeView() == null) {
-            //if (!Float.isNaN(mAlpha)) {
-            //    if (mAlpha > 1.0f) {
-            //        mAlpha = 1.0f;
-            //    } else if (mAlpha < 0.0f) {
-            //        mAlpha = 0.0f;
-            //    }
-            //    mPaint.setAlpha((int)(mAlpha * 255));
-            //    mBackgroundPaint.setAlpha((int)(mAlpha * 255));
-            //}
             if (mBackground != Color.TRANSPARENT) {
-                VirtualViewUtils.drawBackground(canvas, mBackgroundPaint, mMeasuredWidth, mMeasuredHeight, mBorderWidth,
+                VirtualViewUtils.drawBackground(canvas, mBackground, mMeasuredWidth, mMeasuredHeight, mBorderWidth,
                     mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
             } else if (null != mBackgroundImage) {
                 //TODO clip canvas if border radius set
                 mMatrixBG.setScale(((float) mMeasuredWidth) / mBackgroundImage.getWidth(), ((float) mMeasuredHeight) / mBackgroundImage.getHeight());
-                canvas.drawBitmap(mBackgroundImage, mMatrixBG, mBackgroundPaint);
+                canvas.drawBitmap(mBackgroundImage, mMatrixBG, null);
             }
         }
     }
 
+    public void drawBorder(Canvas canvas) {
+        VirtualViewUtils.drawBorder(canvas, mBorderColor, mMeasuredWidth, mMeasuredHeight, mBorderWidth,
+            mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
+    }
+
     public void onParseValueFinished() {
+        resolveRtlPropertiesIfNeeded();
+
+        if (getNativeView() != null) {
+            getNativeView().setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
+        }
         if (!TextUtils.isEmpty(mClass)) {
             parseBean();
         }
@@ -919,7 +1010,7 @@ public abstract class ViewBase implements IView {
                     //Object obj = Class.forName(mClass, true, this.getClass().getClassLoader()).newInstance();
                     if (obj instanceof IBean) {
                         mBean = (IBean) obj;
-                        mBean.init(mContext.getContext(), this);
+                        mBean.init(mContext.forViewConstruction(), this);
                     } else {
                         Log.e(TAG, mClass + " is not bean");
                     }
@@ -1045,20 +1136,39 @@ public abstract class ViewBase implements IView {
     protected boolean setRPAttribute(int key, float value) {
         boolean ret = true;
         switch (key) {
+            case StringBase.STR_ID_padding:
+                mPadding = Utils.rp2px(value);
+                if (!isPaddingLeftSet) {
+                    mPaddingLeft = mPadding;
+                }
+                if (!isPaddingRightSet) {
+                    mPaddingRight = mPadding;
+                }
+                if (!isPaddingTopSet) {
+                    mPaddingTop = mPadding;
+                }
+                if (!isPaddingBottomSet) {
+                    mPaddingBottom = mPadding;
+                }
+                break;
             case StringBase.STR_ID_paddingLeft:
                 mPaddingLeft = Utils.rp2px(value);
+                isPaddingLeftSet = true;
                 break;
 
             case StringBase.STR_ID_paddingTop:
                 mPaddingTop = Utils.rp2px(value);
+                isPaddingTopSet = true;
                 break;
 
             case StringBase.STR_ID_paddingRight:
                 mPaddingRight = Utils.rp2px(value);
+                isPaddingRightSet = true;
                 break;
 
             case StringBase.STR_ID_paddingBottom:
                 mPaddingBottom = Utils.rp2px(value);
+                isPaddingBottomSet = true;
                 break;
 
             case StringBase.STR_ID_minWidth:
@@ -1074,17 +1184,36 @@ public abstract class ViewBase implements IView {
                     this.mParams.mLayoutWidth = (int)value;
                 }
                 break;
+            case StringBase.STR_ID_layoutMargin:
+                this.mParams.mLayoutMargin = Utils.rp2px(value);
+                if (!this.mParams.isLayoutMarginLeftSet) {
+                    this.mParams.mLayoutMarginLeft = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginRightSet) {
+                    this.mParams.mLayoutMarginRight = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginTopSet) {
+                    this.mParams.mLayoutMarginTop = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginBottomSet) {
+                    this.mParams.mLayoutMarginBottom = this.mParams.mLayoutMargin;
+                }
+                break;
             case StringBase.STR_ID_layoutMarginLeft:
                 this.mParams.mLayoutMarginLeft = Utils.rp2px(value);
+                this.mParams.isLayoutMarginLeftSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginTop:
                 this.mParams.mLayoutMarginTop = Utils.rp2px(value);
+                this.mParams.isLayoutMarginTopSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginRight:
                 this.mParams.mLayoutMarginRight = Utils.rp2px(value);
+                this.mParams.isLayoutMarginRightSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginBottom:
                 this.mParams.mLayoutMarginBottom = Utils.rp2px(value);
+                this.mParams.isLayoutMarginBottomSet = true;
                 break;
 
             case StringBase.STR_ID_layoutHeight:
@@ -1138,20 +1267,39 @@ public abstract class ViewBase implements IView {
             case StringBase.STR_ID_alpha:
                 mAlpha = value;
                 break;
+            case StringBase.STR_ID_padding:
+                mPadding = Utils.dp2px(value);
+                if (!isPaddingLeftSet) {
+                    mPaddingLeft = mPadding;
+                }
+                if (!isPaddingRightSet) {
+                    mPaddingRight = mPadding;
+                }
+                if (!isPaddingTopSet) {
+                    mPaddingTop = mPadding;
+                }
+                if (!isPaddingBottomSet) {
+                    mPaddingBottom = mPadding;
+                }
+                break;
             case StringBase.STR_ID_paddingLeft:
                 mPaddingLeft = Utils.dp2px(value);
+                isPaddingLeftSet = true;
                 break;
 
             case StringBase.STR_ID_paddingTop:
                 mPaddingTop = Utils.dp2px(value);
+                isPaddingTopSet = true;
                 break;
 
             case StringBase.STR_ID_paddingRight:
                 mPaddingRight = Utils.dp2px(value);
+                isPaddingRightSet = true;
                 break;
 
             case StringBase.STR_ID_paddingBottom:
                 mPaddingBottom = Utils.dp2px(value);
+                isPaddingBottomSet = true;
                 break;
 
             case StringBase.STR_ID_minWidth:
@@ -1175,17 +1323,36 @@ public abstract class ViewBase implements IView {
                     this.mParams.mLayoutWidth = (int)value;
                 }
                 break;
+            case StringBase.STR_ID_layoutMargin:
+                this.mParams.mLayoutMargin = Utils.dp2px(value);
+                if (!this.mParams.isLayoutMarginLeftSet) {
+                    this.mParams.mLayoutMarginLeft = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginRightSet) {
+                    this.mParams.mLayoutMarginRight = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginTopSet) {
+                    this.mParams.mLayoutMarginTop = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginBottomSet) {
+                    this.mParams.mLayoutMarginBottom = this.mParams.mLayoutMargin;
+                }
+                break;
             case StringBase.STR_ID_layoutMarginLeft:
                 this.mParams.mLayoutMarginLeft = Utils.dp2px(value);
+                this.mParams.isLayoutMarginLeftSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginTop:
                 this.mParams.mLayoutMarginTop = Utils.dp2px(value);
+                this.mParams.isLayoutMarginTopSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginRight:
                 this.mParams.mLayoutMarginRight = Utils.dp2px(value);
+                this.mParams.isLayoutMarginRightSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginBottom:
                 this.mParams.mLayoutMarginBottom = Utils.dp2px(value);
+                this.mParams.isLayoutMarginBottomSet = true;
                 break;
 
             case StringBase.STR_ID_layoutHeight:
@@ -1243,6 +1410,9 @@ public abstract class ViewBase implements IView {
                 mViewCache.put(this, StringBase.STR_ID_layoutWidth, stringValue, Item.TYPE_FLOAT);
                 this.mParams.mLayoutWidth = LayoutCommon.WRAP_CONTENT;
                 break;
+            case StringBase.STR_ID_layoutMargin:
+                mViewCache.put(this, StringBase.STR_ID_layoutMargin, stringValue, Item.TYPE_FLOAT);
+                break;
             case StringBase.STR_ID_layoutMarginLeft:
                 mViewCache.put(this, StringBase.STR_ID_layoutMarginLeft, stringValue, Item.TYPE_FLOAT);
                 break;
@@ -1258,6 +1428,9 @@ public abstract class ViewBase implements IView {
             case StringBase.STR_ID_layoutHeight:
                 mViewCache.put(this, StringBase.STR_ID_layoutHeight, stringValue, Item.TYPE_FLOAT);
                 this.mParams.mLayoutHeight = LayoutCommon.WRAP_CONTENT;
+                break;
+            case StringBase.STR_ID_padding:
+                mViewCache.put(this, StringBase.STR_ID_padding, stringValue, Item.TYPE_FLOAT);
                 break;
             case StringBase.STR_ID_paddingLeft:
                 mViewCache.put(this, StringBase.STR_ID_paddingLeft, stringValue, Item.TYPE_FLOAT);
@@ -1384,6 +1557,29 @@ public abstract class ViewBase implements IView {
             case StringBase.STR_ID_borderBottomRightRadius:
                 mViewCache.put(this, StringBase.STR_ID_borderBottomRightRadius, stringValue, Item.TYPE_FLOAT);
                 break;
+
+            case StringBase.STR_ID_tag:
+                if (Utils.isEL(stringValue)) {
+                    mViewCache.put(this, StringBase.STR_ID_tag, stringValue, Item.TYPE_STRING);
+                } else {
+                    if (!TextUtils.isEmpty(stringValue)) {
+                        try {
+                            // if has more data, use Keyed Tag.
+                            JSONObject jsonObject = new JSONObject(stringValue);
+                            Iterator<String> sIterator = jsonObject.keys();
+                            while (sIterator.hasNext()) {
+                                // tag key
+                                String tagKey = sIterator.next();
+                                setTag(tagKey, jsonObject.getString(tagKey));
+                            }
+                        } catch (JSONException e) {
+                            // just a String value, can't convert to a JSONObject, use Tag only
+                            mTag = stringValue;
+                        }
+                    }
+                }
+                break;
+
             default:
                 ret = false;
         }
@@ -1412,17 +1608,36 @@ public abstract class ViewBase implements IView {
         boolean ret = true;
 
         switch (key) {
+            case StringBase.STR_ID_padding:
+                mPadding = Utils.rp2px(value);
+                if (!isPaddingLeftSet) {
+                    mPaddingLeft = mPadding;
+                }
+                if (!isPaddingRightSet) {
+                    mPaddingRight = mPadding;
+                }
+                if (!isPaddingTopSet) {
+                    mPaddingTop = mPadding;
+                }
+                if (!isPaddingBottomSet) {
+                    mPaddingBottom = mPadding;
+                }
+                break;
             case StringBase.STR_ID_paddingLeft:
                 mPaddingLeft = Utils.rp2px(value);
+                isPaddingLeftSet = true;
                 break;
             case StringBase.STR_ID_paddingRight:
                 mPaddingRight = Utils.rp2px(value);
+                isPaddingRightSet = true;
                 break;
             case StringBase.STR_ID_paddingTop:
                 mPaddingTop = Utils.rp2px(value);
+                isPaddingTopSet = true;
                 break;
             case StringBase.STR_ID_paddingBottom:
                 mPaddingBottom = Utils.rp2px(value);
+                isPaddingBottomSet = true;
                 break;
 
             case StringBase.STR_ID_minWidth:
@@ -1438,17 +1653,36 @@ public abstract class ViewBase implements IView {
                     this.mParams.mLayoutWidth = value;
                 }
                 break;
+            case StringBase.STR_ID_layoutMargin:
+                this.mParams.mLayoutMargin = Utils.rp2px(value);
+                if (!this.mParams.isLayoutMarginLeftSet) {
+                    this.mParams.mLayoutMarginLeft = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginRightSet) {
+                    this.mParams.mLayoutMarginRight = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginTopSet) {
+                    this.mParams.mLayoutMarginTop = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginBottomSet) {
+                    this.mParams.mLayoutMarginBottom = this.mParams.mLayoutMargin;
+                }
+                break;
             case StringBase.STR_ID_layoutMarginLeft:
                 this.mParams.mLayoutMarginLeft = Utils.rp2px(value);
+                this.mParams.isLayoutMarginLeftSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginTop:
                 this.mParams.mLayoutMarginTop = Utils.rp2px(value);
+                this.mParams.isLayoutMarginTopSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginRight:
                 this.mParams.mLayoutMarginRight = Utils.rp2px(value);
+                this.mParams.isLayoutMarginRightSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginBottom:
                 this.mParams.mLayoutMarginBottom = Utils.rp2px(value);
+                this.mParams.isLayoutMarginBottomSet = true;
                 break;
 
             case StringBase.STR_ID_layoutHeight:
@@ -1499,17 +1733,36 @@ public abstract class ViewBase implements IView {
         boolean ret = true;
 
         switch (key) {
+            case StringBase.STR_ID_padding:
+                mPadding = Utils.dp2px(value);
+                if (!isPaddingLeftSet) {
+                    mPaddingLeft = mPadding;
+                }
+                if (!isPaddingRightSet) {
+                    mPaddingRight = mPadding;
+                }
+                if (!isPaddingTopSet) {
+                    mPaddingTop = mPadding;
+                }
+                if (!isPaddingBottomSet) {
+                    mPaddingBottom = mPadding;
+                }
+                break;
             case StringBase.STR_ID_paddingLeft:
                 mPaddingLeft = Utils.dp2px(value);
+                isPaddingLeftSet = true;
                 break;
             case StringBase.STR_ID_paddingRight:
                 mPaddingRight = Utils.dp2px(value);
+                isPaddingRightSet = true;
                 break;
             case StringBase.STR_ID_paddingTop:
                 mPaddingTop = Utils.dp2px(value);
+                isPaddingTopSet = true;
                 break;
             case StringBase.STR_ID_paddingBottom:
                 mPaddingBottom = Utils.dp2px(value);
+                isPaddingBottomSet = true;
                 break;
 
             case StringBase.STR_ID_id:
@@ -1566,17 +1819,36 @@ public abstract class ViewBase implements IView {
                     this.mParams.mLayoutWidth = value;
                 }
                 break;
+            case StringBase.STR_ID_layoutMargin:
+                this.mParams.mLayoutMargin = Utils.dp2px(value);
+                if (!this.mParams.isLayoutMarginLeftSet) {
+                    this.mParams.mLayoutMarginLeft = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginRightSet) {
+                    this.mParams.mLayoutMarginRight = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginTopSet) {
+                    this.mParams.mLayoutMarginTop = this.mParams.mLayoutMargin;
+                }
+                if (!this.mParams.isLayoutMarginBottomSet) {
+                    this.mParams.mLayoutMarginBottom = this.mParams.mLayoutMargin;
+                }
+                break;
             case StringBase.STR_ID_layoutMarginLeft:
                 this.mParams.mLayoutMarginLeft = Utils.dp2px(value);
+                this.mParams.isLayoutMarginLeftSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginTop:
                 this.mParams.mLayoutMarginTop = Utils.dp2px(value);
+                this.mParams.isLayoutMarginTopSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginRight:
                 this.mParams.mLayoutMarginRight = Utils.dp2px(value);
+                this.mParams.isLayoutMarginRightSet = true;
                 break;
             case StringBase.STR_ID_layoutMarginBottom:
                 this.mParams.mLayoutMarginBottom = Utils.dp2px(value);
+                this.mParams.isLayoutMarginBottomSet = true;
                 break;
 
             case StringBase.STR_ID_layoutHeight:
@@ -1634,13 +1906,20 @@ public abstract class ViewBase implements IView {
     }
 
     protected class VirtualViewImp implements IView {
+
+        protected ViewBase mViewBase;
         protected int mPreWidthMeasureSpec = 0;
         protected int mPreHeightMeasureSpec = 0;
         protected boolean mContentChanged;
 
         public VirtualViewImp() {
             mPaint = new Paint();
+            mPaint.setAntiAlias(true);
             reset();
+        }
+
+        public void setViewBase(ViewBase viewBase) {
+            mViewBase = viewBase;
         }
 
         public void setAntiAlias(boolean aa) {
@@ -1679,7 +1958,30 @@ public abstract class ViewBase implements IView {
 
             if (null == mContentRect) {
                 makeContentRect();
-         }
+            }
+
+            int mAutoDimDirection = mViewBase.mAutoDimDirection;
+            float autoX = mViewBase.mAutoDimX;
+            float autoY = mViewBase.mAutoDimY;
+            if (mAutoDimDirection > 0) {
+                switch (mAutoDimDirection) {
+                    case ViewBaseCommon.AUTO_DIM_DIR_X:
+                        if (View.MeasureSpec.EXACTLY == View.MeasureSpec.getMode(widthMeasureSpec)) {
+                            mMeasuredWidth = View.MeasureSpec.getSize(widthMeasureSpec);
+                            mMeasuredHeight = (int)((mMeasuredWidth * autoY) / autoX);
+                        }
+                        return;
+
+                    case AUTO_DIM_DIR_Y:
+                        if (View.MeasureSpec.EXACTLY == View.MeasureSpec.getMode(heightMeasureSpec)) {
+                            mMeasuredHeight = View.MeasureSpec.getSize(heightMeasureSpec);
+                            mMeasuredWidth = (int)((mMeasuredHeight * autoX) / autoY);
+                        }
+                        return;
+                    default:
+                        break;
+                }
+            }
 
             if (LayoutCommon.WRAP_CONTENT == mParams.mLayoutWidth) {
                 if (null != mContentRect) {
@@ -1736,4 +2038,31 @@ public abstract class ViewBase implements IView {
             return 0;
         }
     }
+
+    //----- RTL support begin --- //
+    // use this attr to control RTL or not.
+    private boolean disableRtl;
+
+    /**
+     * Use Rtl or not.
+     * @return true if in locale use Rtl direction && this layout do not disable Rtl.
+     */
+    public boolean isRtl() {
+        return RtlHelper.isRtl() && !disableRtl;
+    }
+
+    /**
+     * resolve rtl properties. such as Padding etc.
+     * Depends on CSS Box Model: https://www.w3.org/TR/CSS2/box.html
+     * Do not convert Margin cause Margin out of the view.
+     */
+    public void resolveRtlPropertiesIfNeeded() {
+        if (isRtl()) {
+            // padding
+            int tempPadding = mPaddingLeft;
+            mPaddingLeft = mPaddingRight;
+            mPaddingRight = tempPadding;
+        }
+    }
+    //----- RTL support end --- //
 }

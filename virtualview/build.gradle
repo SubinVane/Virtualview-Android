@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,20 +24,42 @@
 
 apply plugin: 'com.android.library'
 
+buildscript {
+    repositories {
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url "http://oss.jfrog.org/oss-snapshot-local/" }
+        mavenCentral()
+        jcenter()
+        maven { url 'https://maven.google.com' }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.0'
+    }
+}
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url "http://oss.jfrog.org/oss-snapshot-local/" }
+    jcenter()
+    mavenLocal()
+    maven { url 'https://maven.google.com' }
+}
+
 ext {
     bintrayRepo = 'Tangram'
     bintrayName = 'Virtualview-Android'
 
-    publishedGroupId = GROUP
-    libraryName = ARTIFACT
-    artifact = ARTIFACT
+    publishedGroupId = project.hasProperty('GROUP') ? GROUP : ''
+    libraryName = project.hasProperty('ARTIFACT') ? ARTIFACT : ''
+    artifact = project.hasProperty('ARTIFACT') ? ARTIFACT : ''
 
     libraryDescription = 'A light way to build Android UI in XML'
 
     siteUrl = 'https://github.com/alibaba/Virtualview-Android'
     gitUrl = 'git@github.com:alibaba/Virtualview-Android.git'
 
-    libraryVersion = VERSION_NAME
+    libraryVersion = project.hasProperty('VERSION_NAME') ? VERSION_NAME : ''
 
     developerId = 'longerian'
     developerName = 'longerian'
@@ -49,12 +71,16 @@ ext {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion System.properties['compileSdkVersion'] ? Integer.parseInt(System.properties['compileSdkVersion']) : 25
+    buildToolsVersion System.properties['buildToolsVersion'] ? System.properties['buildToolsVersion'] : '25.0.3'
+
+    lintOptions {
+        abortOnError false
+    }
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion System.properties['targetSdkVersion'] ? Integer.parseInt(System.properties['targetSdkVersion']) : 25
         versionCode 1
         versionName "1.0"
     }
@@ -64,6 +90,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
 }
 
 configurations.all {
@@ -73,13 +104,13 @@ configurations.all {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:support-v4:23.1.1@aar'
-    compile 'com.android.support:support-annotations:23.1.1'
-    compile ('com.alibaba.android:virtual-common:1.0.3') {
+    compile 'com.android.support:support-v4:26.0.2@aar'
+    compile 'com.android.support:support-compat:26.0.2@aar'
+    compile 'com.android.support:support-annotations:26.0.2'
+    compile('com.alibaba.android:virtual-common:1.0.11') {
         changing = true
     }
-    provided 'com.android.support:recyclerview-v7:23.1.1@aar'
-
+    compile 'com.android.support:recyclerview-v7:26.0.2@aar'
 }
 
 File deployConfig = rootProject.file('jcenterInstall.gradle')

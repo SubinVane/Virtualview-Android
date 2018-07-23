@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@ public class ScrollerImp extends RecyclerView implements IView, IContainer {
     }
 
     public ScrollerImp(VafContext context, Scroller scroller) {
-        super(context.getContext());
+        super(context.forViewConstruction());
         mAppContext = context;
         mScroller = scroller;
 
@@ -91,7 +91,7 @@ public class ScrollerImp extends RecyclerView implements IView, IContainer {
             mOrientation = orientation;
             switch (mode) {
                 case ScrollerCommon.MODE_Linear:
-                    mLM = new LinearLayoutManager(mAppContext.getContext());
+                    mLM = new LinearLayoutManager(mAppContext.forViewConstruction());
                     ((LinearLayoutManager) mLM).setOrientation(orientation);
                     break;
 

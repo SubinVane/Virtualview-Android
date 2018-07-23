@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 package com.tmall.wireless.vaf.expr.engine;
 
+import android.support.annotation.Keep;
 import android.text.TextUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,7 +36,7 @@ import java.util.Map;
 /**
  * Created by gujicheng on 17/3/27.
  */
-
+@Keep
 public class DataManager {
     private JSONObject mData = new JSONObject();
 

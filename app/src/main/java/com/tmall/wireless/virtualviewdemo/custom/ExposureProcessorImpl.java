@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,25 +22,25 @@
  * SOFTWARE.
  */
 
-package com.tmall.wireless.vaf.framework.cm;
+package com.tmall.wireless.virtualviewdemo.custom;
 
-import com.tmall.wireless.vaf.framework.VafContext;
-import com.tmall.wireless.vaf.virtualview.container.SurfaceContainer;
-import com.tmall.wireless.vaf.virtualview.core.IContainer;
+import android.util.Log;
+import com.tmall.wireless.vaf.virtualview.event.EventData;
+import com.tmall.wireless.vaf.virtualview.event.IEventProcessor;
 
 /**
- * Created by gujicheng on 16/12/12.
+ * Created by longerian on 2018/3/19.
+ *
+ * @author longerian
+ * @date 2018/03/19
  */
 
-public class SurfaceManager extends ContainerMrg {
+public class ExposureProcessorImpl implements IEventProcessor {
+
     @Override
-    public IContainer getContainer(VafContext context) {
-        IContainer ret;
-        if (mContainers.size() > 0) {
-            ret = mContainers.remove(0);
-        } else {
-            ret = new SurfaceContainer(context.getContext());
-        }
-        return ret;
+    public boolean process(EventData data) {
+        Log.d("ExposureProcessorImpl", "event " + data.mVB + " " + data.mVB.getAction());
+        return true;
     }
+
 }

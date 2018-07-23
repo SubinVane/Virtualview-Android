@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import com.libra.virtualview.common.LayoutCommon;
 import com.libra.virtualview.common.StringBase;
 import com.libra.virtualview.common.ViewBaseCommon;
 import com.tmall.wireless.vaf.framework.VafContext;
+import com.tmall.wireless.vaf.virtualview.Helper.RtlHelper;
 import com.tmall.wireless.vaf.virtualview.core.Layout;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
@@ -62,7 +63,8 @@ public class VHLayout extends Layout {
     private int getChildrenWidth() {
         if (mMeasureChildrenWidth <= 0) {
             mMeasureChildrenWidth = 0;
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 mMeasureChildrenWidth += child.getComMeasuredWidthWithMargin();
             }
         }
@@ -73,7 +75,8 @@ public class VHLayout extends Layout {
     private int getChildrenHeight() {
         if (mMeasureChildrenHeight <= 0) {
             mMeasureChildrenHeight = 0;
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 mMeasureChildrenHeight += child.getComMeasuredHeightWithMargin();
             }
         }
@@ -94,7 +97,8 @@ public class VHLayout extends Layout {
                     left = (r - getChildrenWidth() - mPaddingRight - mBorderWidth);
                 }
 
-                for (ViewBase view : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase view = mSubViews.get(i);
                     if (view.isGone()) {
                         continue;
                     }
@@ -111,7 +115,9 @@ public class VHLayout extends Layout {
                     } else {
                         tt = t + mPaddingTop + mBorderWidth + childP.mLayoutMarginTop;
                     }
-                    view.comLayout(left, tt, left + w, tt + h);
+
+                    int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), left, w);
+                    view.comLayout(realLeft, tt, realLeft + w, tt + h);
 
                     left += w + childP.mLayoutMarginRight;
                 }
@@ -128,7 +134,8 @@ public class VHLayout extends Layout {
                     top = (b - getChildrenHeight() - mPaddingBottom - mBorderWidth);
                 }
 
-                for (ViewBase view : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase view = mSubViews.get(i);
                     if (view.isGone()) {
                         continue;
                     }
@@ -147,7 +154,8 @@ public class VHLayout extends Layout {
                         ll = l + mPaddingLeft + mBorderWidth + childP.mLayoutMarginLeft;
                     }
 
-                    view.comLayout(ll, top, ll + w, top + h);
+                    int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), ll, w);
+                    view.comLayout(realLeft, top, realLeft + w, top + h);
 
                     top += h + childP.mLayoutMarginBottom;
                 }
@@ -203,7 +211,8 @@ public class VHLayout extends Layout {
         int heightMode = View.MeasureSpec.getMode(heightMeasureSpec);
 
         boolean hasMatchWidth = false;
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, length = mSubViews.size(); i < length; i++) {
+            ViewBase child = mSubViews.get(i);
             if(!child.isGone()) {
                 Params p = (Params) child.getComLayoutParams();
                 if ((View.MeasureSpec.EXACTLY != widthMode) && (LayoutCommon.MATCH_PARENT == p.mLayoutWidth)) {
@@ -221,7 +230,8 @@ public class VHLayout extends Layout {
             int uniformMeasureSpec = View.MeasureSpec.makeMeasureSpec(getComMeasuredWidth(),
                     View.MeasureSpec.EXACTLY);
 
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (!child.isGone()) {
                     Layout.Params p = child.getComLayoutParams();
                     if (LayoutCommon.MATCH_PARENT == p.mLayoutWidth) {
@@ -241,7 +251,8 @@ public class VHLayout extends Layout {
 
         boolean hasMatchHeight = false;
         int consumedWidth = 0;
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, length = mSubViews.size(); i < length; i++) {
+            ViewBase child = mSubViews.get(i);
             if (!child.isGone()) {
                 Layout.Params p = child.getComLayoutParams();
                 if ((View.MeasureSpec.EXACTLY != heightMode) && (LayoutCommon.MATCH_PARENT == p.mLayoutHeight)) {
@@ -264,7 +275,8 @@ public class VHLayout extends Layout {
             int uniformMeasureSpec = View.MeasureSpec.makeMeasureSpec(getComMeasuredHeight(),
                     View.MeasureSpec.EXACTLY);
 
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (!child.isGone()) {
                     Layout.Params p = child.getComLayoutParams();
                     if (LayoutCommon.MATCH_PARENT == p.mLayoutHeight) {
@@ -281,7 +293,8 @@ public class VHLayout extends Layout {
             int childrenWidth = 0;
 
             if (ViewBaseCommon.HORIZONTAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -290,7 +303,8 @@ public class VHLayout extends Layout {
                 mMeasureChildrenWidth = childrenWidth;
                 childrenWidth += mPaddingLeft + mPaddingRight + (mBorderWidth << 1);
             } else if (ViewBaseCommon.VERTICAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -320,7 +334,8 @@ public class VHLayout extends Layout {
             int childrenHeight = 0;
 
             if (ViewBaseCommon.HORIZONTAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -332,7 +347,8 @@ public class VHLayout extends Layout {
                 mMeasureChildrenHeight = childrenHeight;
                 childrenHeight += mPaddingTop + mPaddingBottom + (mBorderWidth << 1);
             } else if (ViewBaseCommon.VERTICAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -350,7 +366,8 @@ public class VHLayout extends Layout {
             int childrenHeight = 0;
 
             if (ViewBaseCommon.HORIZONTAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -363,7 +380,8 @@ public class VHLayout extends Layout {
 
                 childrenHeight += mPaddingTop + mPaddingBottom + (mBorderWidth << 1);
             } else if (ViewBaseCommon.VERTICAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.ColorInt;
+import android.text.style.LineHeightSpan;
 import android.widget.TextView;
 
 import com.tmall.wireless.vaf.virtualview.Helper.VirtualViewUtils;
@@ -47,8 +48,6 @@ public class NativeTextImp extends TextView implements IView {
     private int mBorderBottomRightRadius = 0;
     private int mBorderWidth = 0;
     private int mBorderColor = Color.BLACK;
-    private Paint mBackgroundPaint;
-    private Paint mBorderPaint;
 
     public NativeTextImp(Context context) {
         super(context);
@@ -87,26 +86,12 @@ public class NativeTextImp extends TextView implements IView {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mBackgroundColor != Color.TRANSPARENT) {
-            if (null == mBackgroundPaint) {
-                mBackgroundPaint = new Paint();
-                mBackgroundPaint.setAntiAlias(true);
-            }
-            mBackgroundPaint.setColor(mBackgroundColor);
-            VirtualViewUtils.drawBackground(canvas, mBackgroundPaint, canvas.getWidth(), canvas.getHeight(), mBorderWidth,
+            VirtualViewUtils.drawBackground(canvas, mBackgroundColor, canvas.getWidth(), canvas.getHeight(), mBorderWidth,
                 mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
         }
         super.onDraw(canvas);
-        if (mBorderWidth > 0) {
-            if (null == mBorderPaint) {
-                mBorderPaint = new Paint();
-                mBorderPaint.setStyle(Paint.Style.STROKE);
-                mBorderPaint.setAntiAlias(true);
-            }
-            mBorderPaint.setStrokeWidth(mBorderWidth);
-            mBorderPaint.setColor(mBorderColor);
-            VirtualViewUtils.drawBorder(canvas, mBorderPaint, canvas.getWidth(), canvas.getHeight(), mBorderWidth,
-                mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
-        }
+        VirtualViewUtils.drawBorder(canvas, mBorderColor, canvas.getWidth(), canvas.getHeight(), mBorderWidth,
+            mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
     }
 
     @Override
@@ -138,4 +123,5 @@ public class NativeTextImp extends TextView implements IView {
     public void comLayout(int l, int t, int r, int b) {
         this.layout(l, t, r, b);
     }
+
 }

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,21 +53,12 @@ public class VirtualText extends TextBase {
     public VirtualText(VafContext context, ViewCache viewCache) {
         super(context, viewCache);
         mImp.setAntiAlias(true);
+        mImp.setViewBase(this);
     }
 
     @Override
     public void onParseValueFinished() {
         super.onParseValueFinished();
-        if (mBorderWidth > 0) {
-            if (mBorderPaint == null) {
-                mBorderPaint = new Paint();
-                mBorderPaint.setStyle(Paint.Style.STROKE);
-                mBorderPaint.setAntiAlias(true);
-            }
-            mBorderPaint.setColor(mBorderColor);
-            mBorderPaint.setStrokeWidth(mBorderWidth);
-        }
-
         if (0 != (mTextStyle & TextBaseCommon.BOLD)) {
             mPaint.setFakeBoldText(true);
         }
@@ -159,19 +150,12 @@ public class VirtualText extends TextBase {
                 top = mContentRect.height() + mPaddingTop;
             }
 
+            canvas.save();
+            canvas.clipRect(0, 0, mMeasuredWidth, mMeasuredHeight);
             canvas.drawText(mDrawText, left, top - mDescent, mPaint);
-
-            if (mBorderWidth > 0) {
-                if (mBorderPaint == null) {
-                    mBorderPaint = new Paint();
-                    mBorderPaint.setStyle(Paint.Style.STROKE);
-                    mBorderPaint.setAntiAlias(true);
-                }
-                mBorderPaint.setColor(mBorderColor);
-                mBorderPaint.setStrokeWidth(mBorderWidth);
-                VirtualViewUtils.drawBorder(canvas, mBorderPaint, mMeasuredWidth, mMeasuredHeight, mBorderWidth,
-                    mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
-            }
+            canvas.restore();
+            VirtualViewUtils.drawBorder(canvas, mBorderColor, mMeasuredWidth, mMeasuredHeight, mBorderWidth,
+                mBorderTopLeftRadius, mBorderTopRightRadius, mBorderBottomLeftRadius, mBorderBottomRightRadius);
 
         } else {
             Log.w(TAG, "skip draw text");

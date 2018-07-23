@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,51 +57,13 @@ public class ClickHelper {
 
     protected LongRunnable mRunnable;
 
+    //TODO make it static
     public ClickHelper(IContainer c) {
         mContainer = c;
         mRunnable = new LongRunnable();
         final View holderView = c.getHolderView();
         final ViewBase vb = c.getVirtualView();
-        //if (vb.isClickable()) {
-        //    holderView.setOnClickListener(new OnClickListener() {
-        //        @Override
-        //        public void onClick(View v) {
-        //            final ViewBase vView = mContainer.getVirtualView();
-        //            if (null != vView) {
-        //                vView.click(0, 0, false);
-        //            }
-        //        }
-        //    });
-        //}
-        //if (vb.isLongClickable()) {
-        //    holderView.setOnLongClickListener(new OnLongClickListener() {
-        //        @Override
-        //        public boolean onLongClick(View v) {
-        //            final ViewBase vView = mContainer.getVirtualView();
-        //            if (vView != null) {
-        //                vView.click(0, 0, true);
-        //            }
-        //            return true;
-        //        }
-        //    });
-        //}
-        //if (vb.isTouchable()) {
-        //    holderView.setOnTouchListener(new OnTouchListener() {
-        //        @Override
-        //        public boolean onTouch(View v, MotionEvent event) {
-        //            final ViewBase vView = mContainer.getVirtualView();
-        //            if (vView != null) {
-        //                return vView.onTouch(v, event);
-        //            }
-        //            return false;
-        //        }
-        //    });
-        //}
-
-        //if (vb.isClickable() || vb.isLongClickable() || vb.isTouchable()) {
         holderView.setOnTouchListener(new View.OnTouchListener() {
-
-
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -110,6 +72,7 @@ public class ClickHelper {
                 switch (action) {
                     case MotionEvent.ACTION_DOWN:
                         mClickFinished = false;
+                        mLongClickPressed = false;
                         mStartX = (int)motionEvent.getX();
                         mStartY = (int)motionEvent.getY();
                         mLastX = mStartX;
@@ -163,7 +126,6 @@ public class ClickHelper {
                 return ret;
             }
         });
-        //}
     }
 
     class LongRunnable implements Runnable {
@@ -177,7 +139,6 @@ public class ClickHelper {
 
         public void setView(ViewBase v) {
             mView = v;
-
         }
 
         @Override

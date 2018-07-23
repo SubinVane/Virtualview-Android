@@ -60,10 +60,12 @@ dependencies.gradle
 
 captures/
 
-jcenterDeploy.gradle
-jcenterInstall.gradle
+#jcenterDeploy.gradle
+#jcenterInstall.gradle
 deploy.gradle
 
 freeline.py
 freeline_project_description.json
 freeline
+
+build.sh

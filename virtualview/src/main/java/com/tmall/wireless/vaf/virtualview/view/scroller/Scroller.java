@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import android.view.View;
 import com.libra.Utils;
 import com.libra.expr.common.ExprCode;
 import com.libra.virtualview.common.StringBase;
+import com.libra.virtualview.common.VHCommon;
 import com.tmall.wireless.vaf.expr.engine.ExprEngine;
 import com.tmall.wireless.vaf.framework.VafContext;
 import com.tmall.wireless.vaf.virtualview.core.NativeViewBase;
@@ -134,7 +135,6 @@ public class Scroller extends NativeViewBase {
     @Override
     public void onParseValueFinished() {
         super.onParseValueFinished();
-        mNative.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
         if (mLineSpace != 0 || mFirstSpace != 0 || mLastSpace != 0) {
             mNative.addItemDecoration(new SpaceItemDecoration(this, mLineSpace, mFirstSpace, mLastSpace));
         }
@@ -142,7 +142,7 @@ public class Scroller extends NativeViewBase {
         mNative.setSupportSticky(mSupportSticky);
         if (mSupportSticky) {
             if (mNative.getParent() == null) {
-                ScrollerStickyParent ssp = new ScrollerStickyParent(mContext.getContext());
+                ScrollerStickyParent ssp = new ScrollerStickyParent(mContext.forViewConstruction());
                 ssp.addView(mNative, mParams.mLayoutWidth, mParams.mLayoutHeight);
                 __mNative = ssp;
             }
@@ -269,7 +269,11 @@ public class Scroller extends NativeViewBase {
             ret = true;
             switch (key) {
                 case StringBase.STR_ID_orientation:
-                    mOrientation = value;
+                    if (value == VHCommon.HORIZONTAL) {
+                        mOrientation = LinearLayoutManager.HORIZONTAL;
+                    } else if (value == VHCommon.VERTICAL) {
+                        mOrientation = LinearLayoutManager.VERTICAL;
+                    }
                     break;
 
                 case StringBase.STR_ID_mode:

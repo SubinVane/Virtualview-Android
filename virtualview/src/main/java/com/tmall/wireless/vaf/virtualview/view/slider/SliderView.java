@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -87,7 +87,7 @@ public class SliderView extends ViewGroup {
 
     protected Listener mListener;
 
-    // Slider item之间的间距
+    // space between Slider items
     private int mSpan;
     public void setSpan(int span) {
         mSpan = span;
@@ -121,7 +121,7 @@ public class SliderView extends ViewGroup {
             removeAll();
             mDataChanged = false;
             mDataCount = mAdapter.getItemCount();
-            mTotalLen = mDataCount * mItemWidth - mWidth;
+            mTotalLen = mDataCount * mItemWidth + (mDataCount - 1) * mSpan - mWidth;
 
             initData();
         }
@@ -159,11 +159,14 @@ public class SliderView extends ViewGroup {
                 mLTPos = 0;
                 mLTDataIndex = 0;
                 mScrollPos = 0;
-                int maxWidth = mWidth + mItemWidth;
+                int maxWidth = mWidth + mItemWidth + mSpan;
                 mRBDataIndex = count - 1;
                 for (int i = 0; i < count; ++i) {
                     add(i);
                     totalWidth += mItemWidth;
+                    if (i < count - 1) {
+                        totalWidth += mSpan;
+                    }
                     if (totalWidth >= maxWidth) {
                         mRBDataIndex = i;
                         break;
@@ -270,6 +273,8 @@ public class SliderView extends ViewGroup {
 
             case MotionEvent.ACTION_UP:
                 break;
+            default:
+                break;
         }
 
         return ret;
@@ -311,17 +316,17 @@ public class SliderView extends ViewGroup {
                 remove(0);
 
                 mLTDataIndex++;
-                mLTPos -= mItemWidth;
-                scrollBy(-mItemWidth, 0);
+                mLTPos -= (mItemWidth + mSpan);
+                scrollBy(-mItemWidth - mSpan, 0);
             }
         } else if (mLTPos <= mNewThreshold) {
             // add to head
             if (mLTDataIndex > 0) {
 
                 add(--mLTDataIndex, 0);
-                scrollBy(mItemWidth, 0);
+                scrollBy(mItemWidth + mSpan, 0);
 
-                mLTPos += mItemWidth;
+                mLTPos += mItemWidth + mSpan;
             }
         }
 
@@ -331,14 +336,14 @@ public class SliderView extends ViewGroup {
                 remove(this.getChildCount() - 1);
 
                 mRBDataIndex--;
-                mRBPos -= mItemWidth;
+                mRBPos -= (mItemWidth + mSpan);
             }
         } else if (mRBPos <= mNewThreshold) {
             // add to tail
             if (mRBDataIndex < mDataCount - 1) {
                 add(++mRBDataIndex);
 
-                mRBPos += mItemWidth;
+                mRBPos += mItemWidth + mSpan;
             }
         }
     }
@@ -392,6 +397,8 @@ public class SliderView extends ViewGroup {
                 mAutoScrollAni.setDuration(300).start();
                 releaseVelocityTracker();
                 break;
+            default:
+                break;
         }
     }
 
@@ -403,7 +410,7 @@ public class SliderView extends ViewGroup {
         refresh();
 
         this.measureChildren(View.MeasureSpec.makeMeasureSpec(mItemWidth, View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
+            View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
 
         setMeasuredDimension(mWidth, height);
     }

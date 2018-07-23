@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ public class NativeImage extends ImageBase {
 
     public NativeImage(VafContext context, ViewCache viewCache) {
     super(context, viewCache);
-        mNative = new NativeImageImp(context.getContext());
+        mNative = new NativeImageImp(context.forViewConstruction());
     }
 
     @Override
@@ -78,15 +78,12 @@ public class NativeImage extends ImageBase {
     @Override
     public void reset() {
         super.reset();
-        mNative.setImageSrc(null);
-        mSrc = null;
         this.mContext.getImageLoader().bindBitmap(null, this, this.getComMeasuredWidth(), this.getComMeasuredHeight());
     }
 
     @Override
     public void onParseValueFinished() {
         super.onParseValueFinished();
-        mNative.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
         mNative.setScaleType(ImageBase.IMAGE_SCALE_TYPE.get(mScaleType));
         setSrc(this.mSrc);
     }
@@ -153,6 +150,7 @@ public class NativeImage extends ImageBase {
 
     @Override
     public void comLayout(int l, int t, int r, int b) {
+        super.comLayout(l, t, r, b);
         mNative.comLayout(l, t, r, b);
     }
 

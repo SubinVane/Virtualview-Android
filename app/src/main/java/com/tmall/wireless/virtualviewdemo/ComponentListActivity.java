@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +55,7 @@ public class ComponentListActivity extends ListActivity {
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
         HashMap<String, String> ntext = new HashMap<String, String>();
         ntext.put("name", "NText");
+        ntext.put("data", "component_demo/ntext_style.json");
         ntext.put("class", ComponentActivity.class.getName());
         list.add(ntext);
         HashMap<String, String> vtext = new HashMap<String, String>();
@@ -139,6 +140,26 @@ public class ComponentListActivity extends ListActivity {
         vh.put("class", ComponentActivity.class.getName());
         vh.put("data", "component_demo/vh_item.json");
         list.add(vh);
+        HashMap<String, String> nframelayout = new HashMap<String, String>();
+        nframelayout.put("name", "NFrameLayout");
+        nframelayout.put("class", ComponentActivity.class.getName());
+        list.add(nframelayout);
+        HashMap<String, String> ngridlayout = new HashMap<String, String>();
+        ngridlayout.put("name", "NGridLayout");
+        ngridlayout.put("class", ComponentActivity.class.getName());
+        list.add(ngridlayout);
+        HashMap<String, String> nratiolayout = new HashMap<String, String>();
+        nratiolayout.put("name", "NRatioLayout");
+        nratiolayout.put("class", ComponentActivity.class.getName());
+        list.add(nratiolayout);
+        HashMap<String, String> nvhlayout = new HashMap<String, String>();
+        nvhlayout.put("name", "NVHLayout");
+        nvhlayout.put("class", ComponentActivity.class.getName());
+        list.add(nvhlayout);
+        HashMap<String, String> nvh2layout = new HashMap<String, String>();
+        nvh2layout.put("name", "NVH2Layout");
+        nvh2layout.put("class", ComponentActivity.class.getName());
+        list.add(nvh2layout);
         //HashMap<String, String> flexlayout = new HashMap<String, String>();
         //flexlayout.put("name", "FlexLayout");
         //flexlayout.put("class", ComponentActivity.class.getName());

@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2018 Alibaba Group
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.tmall.wireless.virtualviewdemo;
 
 import java.util.ArrayList;
@@ -16,6 +40,7 @@ import com.tmall.wireless.vaf.framework.VafContext;
 import com.tmall.wireless.vaf.framework.ViewManager;
 import com.tmall.wireless.vaf.virtualview.Helper.ImageLoader.IImageLoaderAdapter;
 import com.tmall.wireless.vaf.virtualview.Helper.ImageLoader.Listener;
+import com.tmall.wireless.vaf.virtualview.Helper.VVFeatureConfig;
 import com.tmall.wireless.vaf.virtualview.event.EventManager;
 import com.tmall.wireless.vaf.virtualview.view.image.ImageBase;
 import com.tmall.wireless.virtualviewdemo.bytes.CLICKSCRIPT;
@@ -23,12 +48,18 @@ import com.tmall.wireless.virtualviewdemo.bytes.FRAMELAYOUT;
 import com.tmall.wireless.virtualviewdemo.bytes.GRID;
 import com.tmall.wireless.virtualviewdemo.bytes.GRIDITEM;
 import com.tmall.wireless.virtualviewdemo.bytes.GRIDLAYOUT;
+import com.tmall.wireless.virtualviewdemo.bytes.NFRAMELAYOUT;
+import com.tmall.wireless.virtualviewdemo.bytes.NGRIDLAYOUT;
 import com.tmall.wireless.virtualviewdemo.bytes.NIMAGE;
 import com.tmall.wireless.virtualviewdemo.bytes.NLINE;
+import com.tmall.wireless.virtualviewdemo.bytes.NRATIOLAYOUT;
 import com.tmall.wireless.virtualviewdemo.bytes.NTEXT;
+import com.tmall.wireless.virtualviewdemo.bytes.NVH2LAYOUT;
+import com.tmall.wireless.virtualviewdemo.bytes.NVHLAYOUT;
 import com.tmall.wireless.virtualviewdemo.bytes.PAGE;
 import com.tmall.wireless.virtualviewdemo.bytes.PAGEITEM;
 import com.tmall.wireless.virtualviewdemo.bytes.PAGESCROLLSCRIPT;
+import com.tmall.wireless.virtualviewdemo.bytes.PICASSO;
 import com.tmall.wireless.virtualviewdemo.bytes.PROGRESS;
 import com.tmall.wireless.virtualviewdemo.bytes.RATIOLAYOUT;
 import com.tmall.wireless.virtualviewdemo.bytes.SCROLLERH;
@@ -53,6 +84,8 @@ import com.tmall.wireless.virtualviewdemo.bytes.VIMAGE;
 import com.tmall.wireless.virtualviewdemo.bytes.VLINE;
 import com.tmall.wireless.virtualviewdemo.bytes.VTEXT;
 import com.tmall.wireless.virtualviewdemo.custom.ClickProcessorImpl;
+import com.tmall.wireless.virtualviewdemo.custom.ExposureProcessorImpl;
+import com.tmall.wireless.virtualviewdemo.custom.PicassoImage;
 import com.tmall.wireless.virtualviewdemo.custom.TMReminderTagsView;
 import com.tmall.wireless.virtualviewdemo.custom.TotalContainer;
 
@@ -102,7 +135,7 @@ public class VirtualViewApplication extends Application {
 
         @Override
         public void onPrepareLoad(Drawable placeHolderDrawable) {
-            Log.d("Longer", "onPrepareLoad ");
+            Log.d("VirtualViewApplication", "onPrepareLoad ");
         }
     }
 
@@ -118,6 +151,7 @@ public class VirtualViewApplication extends Application {
     public void onCreate() {
         super.onCreate();
         if (sVafContext == null) {
+            //VVFeatureConfig.setSliderCompat(true);
             Picasso.setSingletonInstance(new Picasso.Builder(this).loggingEnabled(true).build());
             sVafContext = new VafContext(this.getApplicationContext());
             sVafContext.setImageLoaderAdapter(new IImageLoaderAdapter() {
@@ -175,6 +209,11 @@ public class VirtualViewApplication extends Application {
             sViewManager.loadBinBufferSync(SCROLLERVS.BIN);
             sViewManager.loadBinBufferSync(SCROLLERH.BIN);
             sViewManager.loadBinBufferSync(TOTALCONTAINER.BIN);
+            sViewManager.loadBinBufferSync(NFRAMELAYOUT.BIN);
+            sViewManager.loadBinBufferSync(NGRIDLAYOUT.BIN);
+            sViewManager.loadBinBufferSync(NRATIOLAYOUT.BIN);
+            sViewManager.loadBinBufferSync(NVHLAYOUT.BIN);
+            sViewManager.loadBinBufferSync(NVH2LAYOUT.BIN);
             sViewManager.loadBinBufferSync(CLICKSCRIPT.BIN);
             sViewManager.loadBinBufferSync(TMALLCOMPONENT1.BIN);
             sViewManager.loadBinBufferSync(TMALLCOMPONENT2.BIN);
@@ -184,9 +223,12 @@ public class VirtualViewApplication extends Application {
             sViewManager.loadBinBufferSync(TMALLCOMPONENT6.BIN);
             sViewManager.loadBinBufferSync(TMALLCOMPONENT7.BIN);
             sViewManager.loadBinBufferSync(TMALLCOMPONENT8.BIN);
+            sViewManager.loadBinBufferSync(PICASSO.BIN);
             sViewManager.getViewFactory().registerBuilder(BizCommon.TM_TOTAL_CONTAINER,new TotalContainer.Builder());
+            sViewManager.getViewFactory().registerBuilder(1014,new PicassoImage.Builder());
             sVafContext.getCompactNativeManager().register("TMTags", TMReminderTagsView.class);
             sVafContext.getEventManager().register(EventManager.TYPE_Click, new ClickProcessorImpl());
+            sVafContext.getEventManager().register(EventManager.TYPE_Exposure, new ExposureProcessorImpl());
         }
 
     }

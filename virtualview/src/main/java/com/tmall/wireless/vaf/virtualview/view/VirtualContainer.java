@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ import java.util.List;
 /**
  * Created by gujicheng on 16/12/20.
  */
-
+@Deprecated
 public class VirtualContainer extends ViewBase {
     private final static String TAG = "VContainer_TMTEST";
 
@@ -71,11 +71,6 @@ public class VirtualContainer extends ViewBase {
             ((ViewGroup)mViewCache.getHolderView()).removeView((View)mRealVB);
             mRealVB = null;
         }
-    }
-
-    @Override
-    public void onParseValueFinished() {
-        super.onParseValueFinished();
     }
 
     @Override
@@ -117,6 +112,7 @@ public class VirtualContainer extends ViewBase {
 
     @Override
     public void comLayout(int l, int t, int r, int b) {
+        super.comLayout(l, t, r, b);
         if (null != mRealVB) {
             mRealVB.comLayout(l, t, r, b);
         }
@@ -127,7 +123,8 @@ public class VirtualContainer extends ViewBase {
             Layout layout = (Layout) view;
             List<ViewBase> subViews = layout.getSubViews();
             if (null != subViews) {
-                for (ViewBase com : subViews) {
+                for (int i = 0, size = subViews.size(); i < size; i++) {
+                    ViewBase com = subViews.get(i);
                     attachViews(com);
                 }
             }
@@ -144,7 +141,8 @@ public class VirtualContainer extends ViewBase {
             Layout layout = (Layout) view;
             List<ViewBase> subViews = layout.getSubViews();
             if (null != subViews) {
-                for (ViewBase com : subViews) {
+                for (int i = 0, size = subViews.size(); i < size; i++) {
+                    ViewBase com = subViews.get(i);
                     detachViews(com);
                 }
             }

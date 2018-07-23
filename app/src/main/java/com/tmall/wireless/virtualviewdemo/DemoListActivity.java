@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import com.tmall.wireless.virtualviewdemo.preview.PreviewListActivity;
+
 /**
  * Created by longerian on 2017/7/24.
  *
@@ -57,22 +59,28 @@ public class DemoListActivity extends ListActivity {
         //main.put("name", "Main(TODO)");
         //main.put("class", MainActivity.class.getName());
         //list.add(main);
+        HashMap<String, String> parse = new HashMap<String, String>();
+        parse.put("name", "基础流程演示");
+        parse.put("class", ParserDemoActivity.class.getName());
+        list.add(parse);
         HashMap<String, String> api = new HashMap<String, String>();
-        api.put("name", "Components");
+        api.put("name", "内置控件演示");
         api.put("class", ComponentListActivity.class.getName());
         list.add(api);
         HashMap<String, String> bizItems = new HashMap<String, String>();
-        bizItems.put("name", "TmallComponents");
+        bizItems.put("name", "业务场景演示");
         bizItems.put("class", TmallComponentListActivity.class.getName());
         list.add(bizItems);
         HashMap<String, String> script = new HashMap<String, String>();
-        script.put("name", "Scripts(Experimental)");
+        script.put("name", "脚本引擎演示(实验中)");
         script.put("class", ScriptListActivity.class.getName());
         list.add(script);
-        HashMap<String, String> parse = new HashMap<String, String>();
-        parse.put("name", "Parse XML");
-        parse.put("class", ParserDemoActivity.class.getName());
-        list.add(parse);
+
+        HashMap<String, String> preview = new HashMap<String, String>();
+        preview.put("name", "模板实时预览");
+        preview.put("class", PreviewListActivity.class.getName());
+        list.add(preview);
+
         ListAdapter listAdapter = new SimpleAdapter(this, list, android.R.layout.simple_list_item_1, new String[]{"name"}, new int[]{android.R.id.text1});
         setListAdapter(listAdapter);
     }

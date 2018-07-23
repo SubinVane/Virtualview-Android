@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ public class NormalManager extends ContainerMrg {
         if (mContainers.size() > 0) {
             ret = mContainers.remove(0);
         } else {
-            ret = new Container(context.getContext());
+            ret = new Container(context.forViewConstruction());
         }
         return ret;
     }

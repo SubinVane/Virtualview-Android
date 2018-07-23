@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ public class BinaryLoader {
     private StringLoader mStringLoader;
     private UiCodeLoader mUiCodeLoader;
     private ExprCodeLoader mExprCodeLoader;
+    @Deprecated
     private int[] mDepPageIds;
 
     public BinaryLoader() {
@@ -92,6 +93,10 @@ public class BinaryLoader {
 
     // return pageId
     public int loadFromBuffer(byte[] buf) {
+        return loadFromBuffer(buf, false);
+    }
+
+    public int loadFromBuffer(byte[] buf, boolean override) {
         int ret = -1;
 
         if (null != buf) {
@@ -137,7 +142,12 @@ public class BinaryLoader {
 
                         if (reader.seek(uiStartPos)) {
                             // parse ui codes
-                            boolean result = mUiCodeLoader.loadFromBuffer(reader, pageId);
+                            boolean result = false;
+                            if (!override) {
+                                result = mUiCodeLoader.loadFromBuffer(reader, pageId, patchVersion);
+                            } else {
+                                result = mUiCodeLoader.forceLoadFromBuffer(reader, pageId, patchVersion);
+                            }
 
                             // parse string
                             if (reader.getPos() == strStartPos) {

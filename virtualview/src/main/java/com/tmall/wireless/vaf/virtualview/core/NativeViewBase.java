@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -78,9 +78,9 @@ public class NativeViewBase extends ViewBase {
     @Override
     protected void setBackgroundImage(Bitmap bmp) {
         if (VERSION.SDK_INT >= 16) {
-            ((View)__mNative).setBackground(new BitmapDrawable(mContext.getContext().getResources(), bmp));
+            ((View)__mNative).setBackground(new BitmapDrawable(mContext.forViewConstruction().getResources(), bmp));
         } else {
-            ((View)__mNative).setBackgroundDrawable(new BitmapDrawable(mContext.getContext().getResources(), bmp));
+            ((View)__mNative).setBackgroundDrawable(new BitmapDrawable(mContext.forViewConstruction().getResources(), bmp));
         }
     }
 
@@ -157,6 +157,7 @@ public class NativeViewBase extends ViewBase {
 
     @Override
     public void comLayout(int l, int t, int r, int b) {
+        super.comLayout(l, t, r, b);
         if (__mNative instanceof IView) {
             ((IView) __mNative).comLayout(l, t, r, b);
         } else {

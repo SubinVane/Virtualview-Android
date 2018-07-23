@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ import com.tmall.wireless.vaf.virtualview.core.ViewCache;
 /**
  * Created by gujicheng on 16/12/9.
  */
-
+@Deprecated
 public class VirtualTime extends ViewBase {
     public VirtualTime(VafContext context, ViewCache viewCache) {
         super(context, viewCache);

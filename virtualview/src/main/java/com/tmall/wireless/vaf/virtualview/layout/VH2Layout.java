@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ import android.util.Log;
 import com.libra.virtualview.common.StringBase;
 import com.libra.virtualview.common.ViewBaseCommon;
 import com.tmall.wireless.vaf.framework.VafContext;
+import com.tmall.wireless.vaf.virtualview.Helper.RtlHelper;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
 
@@ -60,7 +61,8 @@ public class VH2Layout extends VHLayout {
                 int leftStart = l + mPaddingLeft;
                 int rightStart = r - mPaddingRight;
 
-                for (ViewBase view : mSubViews) {
+                for (int i = 0, size = mSubViews.size(); i < size; i++) {
+                    ViewBase view = mSubViews.get(i);
                     if (view.isGone()) {
                         continue;
                     }
@@ -89,7 +91,9 @@ public class VH2Layout extends VHLayout {
                     } else {
                         tt = t + mPaddingTop + childP.mLayoutMarginTop;
                     }
-                    view.comLayout(left, tt, left + w, tt + h);
+
+                    int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), left, w);
+                    view.comLayout(realLeft, tt, realLeft + w, tt + h);
                 }
                 break;
             }
@@ -99,7 +103,8 @@ public class VH2Layout extends VHLayout {
                 int topStart = t + mPaddingTop;
                 int bottomStart = b - mPaddingBottom;
 
-                for (ViewBase view : mSubViews) {
+                for (int i = 0, size = mSubViews.size(); i < size; i++) {
+                    ViewBase view = mSubViews.get(i);
                     if (view.isGone()) {
                         continue;
                     }
@@ -129,7 +134,8 @@ public class VH2Layout extends VHLayout {
                         ll = l + mPaddingLeft + childP.mLayoutMarginLeft;
                     }
 
-                    view.comLayout(ll, top, ll + w, top + h);
+                    int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), ll, w);
+                    view.comLayout(realLeft, top, realLeft + w, top + h);
                 }
                 break;
             }

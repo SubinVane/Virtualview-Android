@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,7 @@ import static com.libra.virtualview.common.FlexLayoutCommon.JUSTIFY_CONTENT_SPAC
 /**
  * Created by gujicheng on 16/8/22.
  */
+@Deprecated
 public class FlexLayout extends Layout {
     private final static String TAG = "FlexLayout_TMTEST";
 

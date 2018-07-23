@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,6 +70,10 @@ public class ViewManager {
 
     public int loadBinBufferSync(byte[] buffer) {
         return mViewFactory.loadBinBuffer(buffer);
+    }
+
+    public int loadBinBufferSync(byte[] buffer, boolean override) {
+        return mViewFactory.loadBinBuffer(buffer, override);
     }
 
     public ViewBase getViewFromUuid(int uuid) {

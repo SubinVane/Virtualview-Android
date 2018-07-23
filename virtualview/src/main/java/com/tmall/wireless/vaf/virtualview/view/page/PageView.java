@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ import com.libra.virtualview.common.ViewBaseCommon;
 import com.tmall.wireless.vaf.virtualview.container.Container;
 import com.tmall.wireless.vaf.virtualview.core.Adapter;
 import com.tmall.wireless.vaf.virtualview.core.Adapter.ViewHolder;
+import com.tmall.wireless.vaf.virtualview.core.IContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -254,6 +255,7 @@ public class PageView extends ViewGroup {
             } else {
                 replace(mCurPos);
             }
+            mCanSlide = false;
         } else if (count > 1) {
             int pre = (mCurPos - 1);
             if (pre < 0) {
@@ -523,7 +525,7 @@ public class PageView extends ViewGroup {
         View v = this.getChildAt(index);
 
         Adapter.ViewHolder vh = (Adapter.ViewHolder)v.getTag();
-        ((Container)vh.mItemView).getVirtualView().reset();
+        ((IContainer)vh.mItemView).getVirtualView().reset();
         List<Adapter.ViewHolder> items = mItemCache.get(vh.mType);
         if (null == items) {
             items = new ArrayList<>();

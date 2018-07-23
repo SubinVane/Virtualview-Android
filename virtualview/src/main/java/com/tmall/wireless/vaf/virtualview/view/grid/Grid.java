@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ public class Grid extends NativeViewBase {
     public Grid(VafContext context, ViewCache viewCache) {
         super(context, viewCache);
 
-        mNative = new GridImp(context.getContext());
+        mNative = new GridImp(context.forViewConstruction());
         mNative.setVirtualView(this);
         __mNative = mNative;
     }
@@ -133,7 +133,6 @@ public class Grid extends NativeViewBase {
     @Override
     public void onParseValueFinished() {
         super.onParseValueFinished();
-        mNative.setPadding(mPaddingLeft, mPaddingTop, mPaddingRight, mPaddingBottom);
         mNative.setAutoDimDirection(mAutoDimDirection);
         mNative.setAutoDimX(mAutoDimX);
         mNative.setAutoDimY(mAutoDimY);

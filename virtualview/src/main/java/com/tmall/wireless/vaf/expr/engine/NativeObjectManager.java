@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -178,7 +178,8 @@ public class NativeObjectManager {
         ViewBase ret = null;
 
         if (!TextUtils.isEmpty(name)) {
-            for (ViewBase com : mViews) {
+            for (int i = 0, length = mViews.size(); i < length; i++) {
+                ViewBase com = mViews.get(i);
                 if (TextUtils.equals(com.getName(), name)) {
                     ret = com;
                     break;

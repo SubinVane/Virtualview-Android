@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import com.libra.virtualview.common.LayoutCommon;
 import com.libra.virtualview.common.StringBase;
 import com.libra.virtualview.common.ViewBaseCommon;
 import com.tmall.wireless.vaf.framework.VafContext;
+import com.tmall.wireless.vaf.virtualview.Helper.RtlHelper;
 import com.tmall.wireless.vaf.virtualview.core.Layout;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
@@ -78,6 +79,8 @@ public class RatioLayout extends Layout {
                         widthMeasureSpec = View.MeasureSpec.makeMeasureSpec((int)((View.MeasureSpec.getSize(heightMeasureSpec) * mAutoDimX) / mAutoDimY), View.MeasureSpec.EXACTLY);
                     }
                     break;
+                default:
+                    break;
             }
         }
 
@@ -88,6 +91,8 @@ public class RatioLayout extends Layout {
 
             case ViewBaseCommon.HORIZONTAL:
                 measureHorizontal(widthMeasureSpec, heightMeasureSpec);
+                break;
+            default:
                 break;
         }
     }
@@ -101,8 +106,7 @@ public class RatioLayout extends Layout {
         int childWidthMeasureSpec;
         if (childParam.mLayoutRatio > 0) {
             childWidthMeasureSpec = getRatioChildMeasureSpec(parentWidthMeasureSpec,
-                    mPaddingLeft + mPaddingRight + (mBorderWidth << 1), childParam.mLayoutWidth, childParam.mLayoutRatio,
-                    child.getComPaddingLeft() + child.getComPaddingRight());
+                    mPaddingLeft + mPaddingRight + (mBorderWidth << 1), childParam.mLayoutWidth, childParam.mLayoutRatio);
         } else {
             childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
                     mPaddingLeft + mPaddingRight + (mBorderWidth << 1) + childParam.mLayoutMarginLeft + childParam.mLayoutMarginRight, childParam.mLayoutWidth);
@@ -120,8 +124,7 @@ public class RatioLayout extends Layout {
         int childHeightMeasureSpec;
         if (childParam.mLayoutRatio > 0) {
             childHeightMeasureSpec = getRatioChildMeasureSpec(parentHeightMeasureSpec,
-                    mPaddingTop + mPaddingBottom + (mBorderWidth << 1), childParam.mLayoutHeight, childParam.mLayoutRatio,
-                    child.getComPaddingTop() + child.getComPaddingBottom());
+                    mPaddingTop + mPaddingBottom + (mBorderWidth << 1), childParam.mLayoutHeight, childParam.mLayoutRatio);
         } else {
             childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
                     mPaddingTop + mPaddingBottom + (mBorderWidth << 1) + childParam.mLayoutMarginTop + childParam.mLayoutMarginBottom, childParam.mLayoutHeight);
@@ -130,7 +133,7 @@ public class RatioLayout extends Layout {
         child.measureComponent(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
-    protected int getRatioChildMeasureSpec(int parentSpec, int padding, int childDimension, float ratio, int childMargin) {
+    protected int getRatioChildMeasureSpec(int parentSpec, int padding, int childDimension, float ratio) {
         int parentSpecMode = View.MeasureSpec.getMode(parentSpec);
         int parentSpecSize = View.MeasureSpec.getSize(parentSpec);
 
@@ -143,7 +146,7 @@ public class RatioLayout extends Layout {
             // Parent has imposed an exact size on us
             case View.MeasureSpec.EXACTLY:
                 if (ratio > 0) {
-                    resultSize = (int)((ratio * size / mTotalRatio) - childMargin);
+                    resultSize = (int)((ratio * size / mTotalRatio));
                     if (resultSize < 0) {
                         resultSize = 0;
                     }
@@ -157,6 +160,8 @@ public class RatioLayout extends Layout {
             // Parent has imposed a maximum size on us
             case View.MeasureSpec.AT_MOST:
             case View.MeasureSpec.UNSPECIFIED:
+                break;
+            default:
                 break;
         }
 
@@ -174,7 +179,8 @@ public class RatioLayout extends Layout {
         findTotalRatio();
 
         boolean hasMatchHeight = false;
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, length = mSubViews.size(); i < length; i++) {
+            ViewBase child = mSubViews.get(i);
             if (child.isGone()) {
                 continue;
             }
@@ -201,7 +207,8 @@ public class RatioLayout extends Layout {
             int uniformMeasureHeightSpec = View.MeasureSpec.makeMeasureSpec(getComMeasuredHeight(),
                     View.MeasureSpec.EXACTLY);
 
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (child.isGone()) {
                     continue;
                 }
@@ -215,7 +222,8 @@ public class RatioLayout extends Layout {
 
     private void findTotalRatio() {
         mTotalRatio = 0;
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, length = mSubViews.size(); i < length; i++) {
+            ViewBase child = mSubViews.get(i);
             if (child.isGone()) {
                 continue;
             }
@@ -236,7 +244,8 @@ public class RatioLayout extends Layout {
         findTotalRatio();
 
         boolean hasMatchWidth = false;
-        for (ViewBase child : mSubViews) {
+        for (int i = 0, length = mSubViews.size(); i < length; i++) {
+            ViewBase child = mSubViews.get(i);
             if (child.isGone()) {
                 continue;
             }
@@ -264,7 +273,8 @@ public class RatioLayout extends Layout {
             int uniformMeasureHeightSpec = View.MeasureSpec.makeMeasureSpec(getComMeasuredHeight(),
                     View.MeasureSpec.EXACTLY);
 
-            for (ViewBase child : mSubViews) {
+            for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                ViewBase child = mSubViews.get(i);
                 if (child.isGone()) {
                     continue;
                 }
@@ -285,7 +295,8 @@ public class RatioLayout extends Layout {
             if (ViewBaseCommon.HORIZONTAL == mOrientation) {
                 ret = size;
             } else if (ViewBaseCommon.VERTICAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -315,7 +326,8 @@ public class RatioLayout extends Layout {
             int childrenHeight = 0;
 
             if (ViewBaseCommon.HORIZONTAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -337,7 +349,8 @@ public class RatioLayout extends Layout {
             int childrenHeight = 0;
 
             if (ViewBaseCommon.HORIZONTAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -351,7 +364,8 @@ public class RatioLayout extends Layout {
                 childrenHeight += mPaddingTop + mPaddingBottom + (mBorderWidth << 1);
                 ret = childrenHeight;
             } else if (ViewBaseCommon.VERTICAL == mOrientation) {
-                for (ViewBase child : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase child = mSubViews.get(i);
                     if (child.isGone()) {
                         continue;
                     }
@@ -372,7 +386,8 @@ public class RatioLayout extends Layout {
         switch (mOrientation) {
             case ViewBaseCommon.HORIZONTAL: {
                 int left = l + mPaddingLeft + mBorderWidth;
-                for (ViewBase view : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase view = mSubViews.get(i);
                     if (view.isGone()) {
                         continue;
                     }
@@ -390,7 +405,9 @@ public class RatioLayout extends Layout {
                     } else {
                         tt = t + mPaddingTop + mBorderWidth+ childP.mLayoutMarginTop;
                     }
-                    view.comLayout(left, tt, left + w, tt + h);
+
+                    int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), left, w);
+                    view.comLayout(realLeft, tt, realLeft + w, tt + h);
 
                     left += w + childP.mLayoutMarginRight;
                 }
@@ -399,7 +416,8 @@ public class RatioLayout extends Layout {
 
             case ViewBaseCommon.VERTICAL: {
                 int top = t + mPaddingTop + mBorderWidth;
-                for (ViewBase view : mSubViews) {
+                for (int i = 0, length = mSubViews.size(); i < length; i++) {
+                    ViewBase view = mSubViews.get(i);
                     if (view.isGone()) {
                         continue;
                     }
@@ -418,7 +436,8 @@ public class RatioLayout extends Layout {
                         ll = l + mPaddingLeft + mBorderWidth + childP.mLayoutMarginLeft;
                     }
 
-                    view.comLayout(ll, top, ll + w, top + h);
+                    int realLeft = RtlHelper.getRealLeft(isRtl(), l, getWidth(), ll, w);
+                    view.comLayout(realLeft, top, realLeft + w, top + h);
 
                     top += h + childP.mLayoutMarginBottom;
                 }

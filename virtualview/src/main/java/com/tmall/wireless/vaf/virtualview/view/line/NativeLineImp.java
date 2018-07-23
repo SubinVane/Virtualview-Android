@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ import android.view.View;
 
 import com.libra.virtualview.common.LayoutCommon;
 import com.libra.virtualview.common.ViewBaseCommon;
+import com.tmall.wireless.vaf.virtualview.Helper.VirtualViewUtils;
 import com.tmall.wireless.vaf.virtualview.core.IView;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 
@@ -171,10 +172,8 @@ public class NativeLineImp extends View implements IView {
         int width = this.getMeasuredWidth();
         int height = this.getComMeasuredHeight();
 
-        Paint backgroundPaint = mBase.getBackgroundPaint();
-        if (null != backgroundPaint) {
-            canvas.drawRect(0, 0, width, height, backgroundPaint);
-        }
+        VirtualViewUtils.drawBackground(canvas, mBase.getBackground(), width, height, 0,
+            0, 0, 0, 0);
 
         int strokeWidth = (int) mPaint.getStrokeWidth();
         int align = mBase.getAlign();

@@ -2,7 +2,7 @@
 <!--
   ~ MIT License
   ~
-  ~ Copyright (c) 2017 Alibaba Group
+  ~ Copyright (c) 2018 Alibaba Group
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -107,6 +107,22 @@
             layoutHeight="20" />
 
     <NText
+            text="Title: textStyle = underline"
+            textSize="12"
+            textColor="#333333"
+            background="#008899"
+            layoutWidth="match_parent"
+            layoutHeight="20" />
+
+    <NText
+            text="Hello Virtual View"
+            textSize="12"
+            textColor="#333333"
+            textStyle="underline"
+            layoutWidth="wrap_content"
+            layoutHeight="20" />
+
+    <NText
             text="Title: textStyle = italic"
             textSize="12"
             textColor="#333333"
@@ -138,6 +154,25 @@
             borderWidth="1"
             layoutWidth="wrap_content"
             layoutHeight="20" />
+
+    <NText
+            text="Title: borderWidth = 1 borderColor = #0088FF borderRadius = 2"
+            textSize="12"
+            textColor="#333333"
+            background="#008899"
+            layoutWidth="match_parent"
+            layoutHeight="20" />
+
+    <NText
+            text="Hello Virtual View"
+            textSize="12"
+            textColor="#333333"
+            borderColor="#0088FF"
+            borderRadius="2"
+            borderWidth="1"
+            layoutWidth="wrap_content"
+            layoutHeight="20" />
+
 
     <NText
             text="Title: gravity = h_center|v_center"
@@ -305,6 +340,39 @@
             text="<h2>Title</h2><br><p>Description here</p>"
             textSize="12"
             textColor="#333333"
+            supportHTMLStyle="true"
+            layoutWidth="match_parent"
+            layoutHeight="wrap_content" />
+
+    <NText
+            text="Title: lineHeight = 30 with pure text"
+            textSize="12"
+            textColor="#333333"
+            background="#008899"
+            layoutWidth="match_parent"
+            layoutHeight="20" />
+
+    <NText
+            text="(alway center in vertically, layoutHeight should be wrap_content)"
+            textSize="12"
+            textColor="#333333"
+            lineHeight="30"
+            layoutWidth="match_parent"
+            layoutHeight="wrap_content" />
+
+    <NText
+            text="Title: lineHeight = 30 with rich text"
+            textSize="12"
+            textColor="#333333"
+            background="#008899"
+            layoutWidth="match_parent"
+            layoutHeight="20" />
+
+    <NText
+            text="rich text: <font color=#00bbaa>Lorem ipsum...</font>"
+            textSize="12"
+            textColor="#333333"
+            lineHeight="30"
             supportHTMLStyle="true"
             layoutWidth="match_parent"
             layoutHeight="wrap_content" />

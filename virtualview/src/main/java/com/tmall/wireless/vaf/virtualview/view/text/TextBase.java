@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017 Alibaba Group
+ * Copyright (c) 2018 Alibaba Group
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import com.libra.Utils;
 import com.libra.virtualview.common.StringBase;
 import com.tmall.wireless.vaf.framework.VafContext;
+import com.tmall.wireless.vaf.virtualview.Helper.RtlHelper;
 import com.tmall.wireless.vaf.virtualview.core.ViewBase;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache;
 import com.tmall.wireless.vaf.virtualview.core.ViewCache.Item;
@@ -86,6 +87,15 @@ public abstract class TextBase extends ViewBase {
     }
 
     @Override
+    public void onParseValueFinished() {
+        super.onParseValueFinished();
+
+        if (isRtl()) {
+            mGravity = RtlHelper.resolveRtlGravity(mGravity);
+        }
+    }
+
+    @Override
     protected boolean setAttribute(int key, String stringValue) {
         boolean ret = super.setAttribute(key, stringValue);
 
@@ -106,6 +116,9 @@ public abstract class TextBase extends ViewBase {
                     break;
                 case StringBase.STR_ID_textColor:
                     mViewCache.put(this, StringBase.STR_ID_textColor, stringValue, Item.TYPE_COLOR);
+                    break;
+                case StringBase.STR_ID_textStyle:
+                    mViewCache.put(this, StringBase.STR_ID_textStyle, stringValue, Item.TYPE_TEXT_STYLE);
                     break;
                 default:
                     ret = false;
